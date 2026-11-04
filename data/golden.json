@@ -1,0 +1,409 @@
+{
+ "derived": {
+  "LAT": {},
+  "BRICK": {
+   "u_value": 2.2832041764495656,
+   "gwp_core": 147.86010000000002,
+   "cost": 1458.6246530904364
+  },
+  "AAC": {
+   "u_value": 0.7750474268453471,
+   "gwp_core": 35.952000000000005,
+   "cost": 691.6666666666667
+  },
+  "CSEB": {
+   "u_value": 2.5329654133555093,
+   "gwp_core": 11.3551
+  },
+  "HCB": {
+   "cost": 625.0
+  },
+  "FAB": {
+   "u_value": 2.118739725154579
+  },
+  "PCB": {
+   "u_value": 1.9221738265776716
+  },
+  "GEO": {},
+  "RAB": {},
+  "SAND": {
+   "u_value": 0.535747078973599
+  },
+  "CLC": {
+   "u_value": 0.7891931747494515
+  },
+  "BRKCOIR": {
+   "u_value": 0.9125122363120547
+  },
+  "SAND_CLC": {
+   "u_value": 0.3709627680892106
+  }
+ },
+ "ranked": [
+  {
+   "id": "AAC",
+   "score": 0.9099047653932091,
+   "completeness": 0.7,
+   "criteria_used": [
+    "u_value",
+    "gwp_core"
+   ]
+  },
+  {
+   "id": "CSEB",
+   "score": 0.5,
+   "completeness": 0.5,
+   "criteria_used": [
+    "u_value",
+    "gwp_core"
+   ]
+  },
+  {
+   "id": "BRICK",
+   "score": 0.07103893322172906,
+   "completeness": 0.7,
+   "criteria_used": [
+    "u_value",
+    "gwp_core"
+   ]
+  }
+ ],
+ "excluded": [
+  "LAT",
+  "HCB",
+  "FAB",
+  "PCB",
+  "GEO",
+  "RAB",
+  "SAND",
+  "CLC",
+  "BRKCOIR",
+  "SAND_CLC"
+ ],
+ "ranked_lowgate": [
+  {
+   "id": "SAND_CLC",
+   "score": 1.0
+  },
+  {
+   "id": "SAND",
+   "score": 0.9237816330867201
+  },
+  {
+   "id": "AAC",
+   "score": 0.8130970562682338
+  },
+  {
+   "id": "CLC",
+   "score": 0.8065541651505581
+  },
+  {
+   "id": "BRKCOIR",
+   "score": 0.7495148910161762
+  },
+  {
+   "id": "PCB",
+   "score": 0.28251195164592646
+  },
+  {
+   "id": "FAB",
+   "score": 0.19159351590428278
+  },
+  {
+   "id": "BRICK",
+   "score": 0.11552309496604708
+  },
+  {
+   "id": "CSEB",
+   "score": 0.0
+  }
+ ],
+ "ranked_priced": [
+  {
+   "id": "AAC",
+   "score": 1.0
+  },
+  {
+   "id": "BRICK",
+   "score": 0.0
+  }
+ ],
+ "legacy": [
+  {
+   "id": "M2",
+   "name": "Laterite block wall (200mm, plastered)",
+   "score": 0.6731
+  },
+  {
+   "id": "M4",
+   "name": "CSEB wall (230mm, plastered)",
+   "score": 0.5086
+  },
+  {
+   "id": "M3",
+   "name": "AAC block wall (200mm, plastered)",
+   "score": 0.4841
+  },
+  {
+   "id": "M5",
+   "name": "Hollow concrete block wall (200mm, plastered)",
+   "score": 0.4755
+  },
+  {
+   "id": "M1",
+   "name": "Burnt clay brick wall (230mm, plastered)",
+   "score": 0.3851
+  }
+ ],
+ "sens_u": [
+  {
+   "weight": 0.05,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.095,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.14,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.185,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.23,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.275,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.32,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.365,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.41,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.455,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.5,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  }
+ ],
+ "sens_gwp": [
+  {
+   "weight": 0.05,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.095,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.14,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.185,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.23,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.275,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.32,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.365,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.41,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.455,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  },
+  {
+   "weight": 0.5,
+   "winner": "AAC (autoclaved aerated concrete) blocks"
+  }
+ ],
+ "indicators": {
+  "LAT": null,
+  "BRICK": {
+   "u_periodic": 1.0177210940970094,
+   "decrement_factor": 0.4457424809372892,
+   "time_lag_h": 7.004111122263826,
+   "areal_heat_capacity_kj_m2k": 388.80192
+  },
+  "AAC": {
+   "u_periodic": 0.3243823403062764,
+   "decrement_factor": 0.4185322459899007,
+   "time_lag_h": 8.649290629495868,
+   "areal_heat_capacity_kj_m2k": 194.73792000000003
+  },
+  "CSEB": {
+   "u_periodic": 0.9914771675525033,
+   "decrement_factor": 0.3914294140475682,
+   "time_lag_h": 7.3606620084804355,
+   "areal_heat_capacity_kj_m2k": 478.50192000000004
+  },
+  "HCB": null,
+  "FAB": {
+   "u_periodic": 0.8977915417962741,
+   "decrement_factor": 0.42373847581999385,
+   "time_lag_h": 7.379265326468231,
+   "areal_heat_capacity_kj_m2k": 388.45692
+  },
+  "PCB": {
+   "u_periodic": 1.194849517783957,
+   "decrement_factor": 0.6216136653526925,
+   "time_lag_h": 5.5572499918417915,
+   "areal_heat_capacity_kj_m2k": 233.12192000000002
+  },
+  "GEO": null,
+  "RAB": null,
+  "SAND": {
+   "u_periodic": 0.1364776421305068,
+   "decrement_factor": 0.2547426714709764,
+   "time_lag_h": 9.785255961415174,
+   "areal_heat_capacity_kj_m2k": 390.40992
+  },
+  "CLC": {
+   "u_periodic": 0.35935936474988317,
+   "decrement_factor": 0.45535032010885107,
+   "time_lag_h": 8.175037290771611,
+   "areal_heat_capacity_kj_m2k": 183.36192000000003
+  },
+  "BRKCOIR": {
+   "u_periodic": 0.26591920710984973,
+   "decrement_factor": 0.29141440139429814,
+   "time_lag_h": 8.324936814768913,
+   "areal_heat_capacity_kj_m2k": 391.22692
+  },
+  "SAND_CLC": {
+   "u_periodic": 0.1235247278439504,
+   "decrement_factor": 0.3329841657161796,
+   "time_lag_h": 10.281998406102947,
+   "areal_heat_capacity_kj_m2k": 184.96992
+  }
+ },
+ "retv_project": {
+  "walls": [
+   {
+    "area_m2": 26.4,
+    "orientation": "S"
+   },
+   {
+    "area_m2": 22.56,
+    "orientation": "E"
+   },
+   {
+    "area_m2": 28.92,
+    "orientation": "N"
+   },
+   {
+    "area_m2": 22.56,
+    "orientation": "W"
+   }
+  ],
+  "openings": [
+   {
+    "id": "WIN110000000000000000000",
+    "name": "Window S1",
+    "type": "window",
+    "host_wall": "WALL0010000000000000000",
+    "area_m2": 1.7999999999999998,
+    "azimuth_deg": 195.0,
+    "orientation": "S",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN120000000000000000000",
+    "name": "Window S2",
+    "type": "window",
+    "host_wall": "WALL0010000000000000000",
+    "area_m2": 1.7999999999999998,
+    "azimuth_deg": 195.0,
+    "orientation": "S",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN210000000000000000000",
+    "name": "Window E1",
+    "type": "window",
+    "host_wall": "WALL0020000000000000000",
+    "area_m2": 1.44,
+    "azimuth_deg": 105.0,
+    "orientation": "E",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN310000000000000000000",
+    "name": "Window N1",
+    "type": "window",
+    "host_wall": "WALL0030000000000000000",
+    "area_m2": 1.08,
+    "azimuth_deg": 15.0,
+    "orientation": "N",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN410000000000000000000",
+    "name": "Window W1",
+    "type": "window",
+    "host_wall": "WALL0040000000000000000",
+    "area_m2": 1.44,
+    "azimuth_deg": 285.0,
+    "orientation": "W",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   }
+  ]
+ },
+ "retv_substitution": {
+  "BRICK": 14.233899289148132,
+  "AAC": 7.279778378558264,
+  "CSEB": 15.385550031471976,
+  "FAB": 13.47555259866036,
+  "PCB": 12.569185918962589,
+  "SAND": 6.176362865891518,
+  "CLC": 7.345004517234951,
+  "BRKCOIR": 7.913629539078249,
+  "SAND_CLC": 5.416541300686845
+ },
+ "retv_modelled": 12.86329003792672
+}

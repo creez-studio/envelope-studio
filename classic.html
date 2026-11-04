@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envelope Evidence Platform</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1d1d1b;--mut:#66665f;--line:#d9d8d0;--card:#fff;--acc:#2f5d50;--warn:#9a5b00;--bad:#a12a2a;--good:#2f6b3a}
+@media (prefers-color-scheme:dark){:root{--bg:#161715;--fg:#ecebe4;--mut:#a3a298;--line:#33342f;--card:#1e1f1c;--acc:#7fc2ad;--warn:#e0a54a;--bad:#ef8b8b;--good:#8fd29b}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header,main{max-width:1080px;margin:0 auto;padding:0 16px}header{padding-top:20px}
+h1{font-size:1.35rem;margin:.2rem 0}h2{font-size:1.05rem;margin:0 0 .6rem}p{margin:.3rem 0}.mut{color:var(--mut)}.small{font-size:.85rem}
+.banner{border:1px solid var(--warn);color:var(--warn);padding:8px 12px;border-radius:8px;margin:12px 0;font-size:.9rem}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{font-weight:600;color:var(--mut)}
+.num{text-align:right;font-variant-numeric:tabular-nums}.scroll{overflow-x:auto}
+.badge{display:inline-block;padding:0 7px;border-radius:99px;border:1px solid var(--line);font-size:.75rem;margin-right:3px}
+.A,.B{color:var(--good)}.C{color:var(--warn)}.D{color:var(--bad)}
+.bar{height:8px;border-radius:4px;background:var(--acc);display:inline-block;vertical-align:middle}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}label{font-size:.85rem}input[type=range]{width:130px;vertical-align:middle}
+button,select{font:inherit;padding:5px 10px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:6px;cursor:pointer}
+button.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+.exp p{margin:.6rem 0}.audit-ok{color:var(--good)}.audit-bad{color:var(--bad)}
+details{margin:6px 0}summary{cursor:pointer}code{font-size:.85em}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav a{color:var(--acc);text-decoration:none;font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Envelope Evidence Platform</h1>
+  <p class="mut">Evidence-gated screening of external-wall options for warm-humid Kerala &middot; B.Arch dissertation research demonstrator &middot; v3</p>
+  <nav><a href="#rank">Ranking</a><a href="#explain">Explanation</a><a href="#climate">Climate</a><a href="#bim">BIM &amp; RETV</a><a href="#library">Material library</a><a href="#framework">64-criterion framework</a><a href="#sens">Sensitivity</a><a href="#rating">Codes &amp; ratings</a><a href="#sources">Sources</a></nav>
+  <div class="banner" id="banner"></div>
+</header>
+<main>
+<section id="controls">
+  <h2>Evidence gate and weights</h2>
+  <div class="row">
+    <label>Minimum evidence grade <select id="grade"><option>A</option><option>B</option><option selected>C</option></select></label>
+    <label>Minimum completeness <input id="comp" type="range" min="0.25" max="1" step="0.25" value="0.5"> <b id="compv">0.50</b></label>
+    <label><input type="checkbox" id="retvgate"> Apply ENS RETV screen from the BIM model</label>
+    <label><input type="checkbox" id="legacy"> Show legacy prototype demo (unverified numbers)</label>
+  </div>
+  <div class="row" id="wsliders" style="margin-top:8px"></div>
+  <p class="small mut">Weights are provisional researcher assumptions (no AHP yet). Changing a weight changes scoring only; the evidence gate stays at the baseline weights.</p>
+</section>
+<section id="rank"><h2>Ranking</h2><div id="rankout"></div></section>
+<section id="explain"><h2>Explanation layer</h2>
+  <div class="row">
+    <label>Mode <select id="tier"><option value="deterministic">Deterministic (offline, no model)</option><option value="webllm">Small in-browser model (WebGPU, optional)</option><option value="ollama">Local Ollama server (optional)</option></select></label>
+    <button class="primary" id="go">Explain this result</button><span id="status" class="small mut"></span>
+  </div>
+  <div class="exp" id="expout"></div>
+  <p class="small mut">Every explanation is audited: numbers must come from the engine output, unsupported claims are rejected, and any model output that fails falls back to the deterministic text. The language layer never calculates or changes a score.</p>
+</section>
+<section id="climate"><h2>Climate analysis (exposure inputs, not scored)</h2>
+  <div class="row"><label>Location <select id="city"></select></label></div>
+  <div id="climout"></div></section>
+<section id="bim"><h2>BIM integration and envelope code screen (ENS RETV)</h2>
+  <p class="small mut">Load a project JSON produced by <code>python engine/bim_ifc.py model.ifc</code> (IFC walls, layers, windows, true north), or use the built-in sample model. RETV is a whole-envelope check, not a wall-material certification.</p>
+  <div class="row"><label>Project file <input type="file" id="prjfile" accept=".json"></label><button id="prjsample">Use sample model</button></div>
+  <div id="bimout"></div></section>
+<section id="library"><h2>Material library</h2><div class="scroll" id="libout"></div></section>
+<section id="sens"><h2>Sensitivity (one weight swept 0.05 &rarr; 0.50)</h2><div id="sensout"></div></section>
+<section id="framework"><h2>64-criterion framework and what the engine implements</h2><div class="scroll" id="fwout"></div></section>
+<section id="rating"><h2>Codes and rating-system requirements</h2><div class="scroll" id="ratout"></div></section>
+<section id="sources"><h2>Source register</h2><div class="scroll" id="srcout"></div></section>
+</main>
+<script type="module" src="classic.js"></script>
+</body>
+</html>

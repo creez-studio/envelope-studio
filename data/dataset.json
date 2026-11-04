@@ -1,0 +1,2592 @@
+{
+ "db": {
+  "schema_version": "3.0",
+  "prepared": "2026-11-04",
+  "functional_unit": "1 m2 of external wall, 12 mm cement plaster on both faces unless stated, conductivities in the dry state (moisture effects not modelled)",
+  "policy": {
+   "missing_value_policy": "A missing value is never imputed. A material is ranked only if the weight of criteria that have a value at or above min_grade is at least min_completeness. Scores use only available criteria with weights renormalised, and are labelled partial.",
+   "min_grade": "C",
+   "min_completeness": 0.5,
+   "grades": {
+    "A": "product-specific accredited test / verified EPD",
+    "B": "recognised published dataset or peer-reviewed study (check geography)",
+    "C": "generic industry average, aggregator record, secondary report or estimate - provisional",
+    "D": "missing / unsupported - never contributes to a ranking"
+   },
+   "statuses": {
+    "read_primary": "value taken from a primary document that was opened and read",
+    "secondary_reported": "value reported by an unverified secondary summary; check the primary document",
+    "derived": "calculated by this platform from cited inputs",
+    "missing": "no usable value"
+   }
+  },
+  "criteria": [
+   {
+    "id": "u_value",
+    "name": "Wall U-value (calculated, ENS 2024 method)",
+    "unit": "W/m2K",
+    "direction": "lower_better",
+    "weight": 0.25,
+    "kind": "derived",
+    "rationale": "Conductive heat gain through the wall; ENS 2024 prescribes this calculation method (Sec. 9.3)."
+   },
+   {
+    "id": "gwp_core",
+    "name": "Embodied carbon, masonry core only (A1-A3 where stated)",
+    "unit": "kgCO2e/m2",
+    "direction": "lower_better",
+    "weight": 0.25,
+    "kind": "derived",
+    "rationale": "Core-layer GWP per m2 = factor x density x thickness. Excludes mortar, plaster, transport, replacement. Boundaries differ between sources."
+   },
+   {
+    "id": "cost",
+    "name": "Masonry unit cost (INR/m2 of wall face, units only)",
+    "unit": "INR/m2",
+    "direction": "lower_better",
+    "weight": 0.2,
+    "kind": "derived",
+    "rationale": "Redefined in v3 to the part that can be evidenced from public price listings: unit price x pieces per m2. Excludes mortar, plaster, labour, transport, wastage. Full installed cost still needs dealer quotations."
+   },
+   {
+    "id": "service_life",
+    "name": "Expected service life",
+    "unit": "years",
+    "direction": "higher_better",
+    "weight": 0.12,
+    "kind": "evidence",
+    "rationale": "Requires published or manufacturer evidence with basis."
+   },
+   {
+    "id": "availability",
+    "name": "Local availability (Kerala)",
+    "unit": "score 1-5",
+    "direction": "higher_better",
+    "weight": 0.1,
+    "kind": "survey",
+    "rationale": "Requires supplier survey."
+   },
+   {
+    "id": "maintenance",
+    "name": "Maintenance demand",
+    "unit": "score 1-5",
+    "direction": "lower_better",
+    "weight": 0.08,
+    "kind": "survey",
+    "rationale": "Requires expert judgement or inspection evidence."
+   }
+  ],
+  "surface_resistance": {
+   "rsi": 0.13,
+   "rse": 0.04,
+   "source": "S01",
+   "note": "ENS 2024 Table 45, wall, all zones"
+  },
+  "layer_catalogue": {
+   "cement_plaster": {
+    "name": "Cement plaster",
+    "density": 1762,
+    "k": 0.721,
+    "cp_kj_kgK": 0.84,
+    "source": "S01",
+    "locator": "Table 46 #19"
+   },
+   "clay_brick_1920": {
+    "name": "Solid burnt clay brick, 1920 kg/m3",
+    "density": 1920,
+    "k": 0.98,
+    "cp_kj_kgK": 0.8,
+    "source": "S01",
+    "locator": "Table 46 #1"
+   },
+   "clay_brick_1760": {
+    "name": "Solid burnt clay brick, 1760 kg/m3",
+    "density": 1760,
+    "k": 0.85,
+    "cp_kj_kgK": null,
+    "source": "S01",
+    "locator": "Table 46 #2"
+   },
+   "hollow_clay_1520": {
+    "name": "Resource-efficient (hollow) brick, 1520 kg/m3",
+    "density": 1520,
+    "k": 0.631,
+    "cp_kj_kgK": 0.65,
+    "source": "S01",
+    "locator": "Table 46 #5"
+   },
+   "fly_ash_brick_1650": {
+    "name": "Fly ash brick, 1650 kg/m3",
+    "density": 1650,
+    "k": 0.856,
+    "cp_kj_kgK": 0.93,
+    "source": "S01",
+    "locator": "Table 46 #6"
+   },
+   "aac_642": {
+    "name": "AAC block, 642 kg/m3",
+    "density": 642,
+    "k": 0.184,
+    "cp_kj_kgK": 1.24,
+    "source": "S01",
+    "locator": "Table 46 #9"
+   },
+   "cseb_1800": {
+    "name": "Cement-stabilised soil block (CSEB), 1800 kg/m3",
+    "density": 1800,
+    "k": 1.201,
+    "cp_kj_kgK": 1.07,
+    "source": "S01",
+    "locator": "Table 46 #11"
+   },
+   "solid_concrete_block_2427": {
+    "name": "Solid concrete block 25/50, 2427 kg/m3",
+    "density": 2427,
+    "k": 1.396,
+    "cp_kj_kgK": 0.2,
+    "source": "S01",
+    "locator": "Table 46 #7"
+   },
+   "eps_24": {
+    "name": "Expanded polystyrene, 24 kg/m3",
+    "density": 24,
+    "k": 0.035,
+    "cp_kj_kgK": 1.34,
+    "source": "S01",
+    "locator": "Insulating materials #2"
+   },
+   "cellular_concrete_704": {
+    "name": "Cellular concrete (CLC), 704 kg/m3",
+    "density": 704,
+    "k": 0.188,
+    "cp_kj_kgK": 1.05,
+    "source": "S01",
+    "locator": "Table 46 #21"
+   },
+   "cseb_1700": {
+    "name": "Cement-stabilised soil block (CSEB), 1700 kg/m3",
+    "density": 1700,
+    "k": 1.026,
+    "cp_kj_kgK": 1.03,
+    "source": "S01",
+    "locator": "Table 46 #10"
+   },
+   "cseb_1900": {
+    "name": "Cement-stabilised soil block (CSEB), 1900 kg/m3",
+    "density": 1900,
+    "k": 1.303,
+    "cp_kj_kgK": 1.07,
+    "source": "S01",
+    "locator": "Table 46 #12"
+   },
+   "mud_phuska_1622": {
+    "name": "Mud phuska, 1622 kg/m3",
+    "density": 1622,
+    "k": 0.519,
+    "cp_kj_kgK": 0.88,
+    "source": "S01",
+    "locator": "Table 46 #17"
+   },
+   "coir_board_97": {
+    "name": "Coir board, 97 kg/m3",
+    "density": 97,
+    "k": 0.038,
+    "cp_kj_kgK": 1.0,
+    "source": "S01",
+    "locator": "Insulating materials #36"
+   },
+   "coconut_pith_board_520": {
+    "name": "Coconut pith insulation board, 520 kg/m3",
+    "density": 520,
+    "k": 0.06,
+    "cp_kj_kgK": 1.09,
+    "source": "S01",
+    "locator": "Insulating materials #32"
+   },
+   "wood_wool_board_398": {
+    "name": "Wood-wool board (cement bonded), 398 kg/m3",
+    "density": 398,
+    "k": 0.081,
+    "cp_kj_kgK": 1.13,
+    "source": "S01",
+    "locator": "Insulating materials #34"
+   },
+   "foam_concrete_400": {
+    "name": "Foam concrete, 400 kg/m3",
+    "density": 400,
+    "k": 0.084,
+    "cp_kj_kgK": 0.92,
+    "source": "S01",
+    "locator": "Insulating materials #7"
+   }
+  },
+  "candidates": [
+   {
+    "id": "LAT",
+    "name": "Laterite stone blocks",
+    "family": "Traditional / local masonry",
+    "kerala_relevance": "Kerala-native quarried stone; long vernacular use, strong regional identity.",
+    "maturity": "Established (local)",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": null,
+       "label": "Laterite block core (no cited conductivity)",
+       "t_mm": 200
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "Core thickness is a placeholder. ENS Table 46 has no laterite entry; U-value cannot be calculated until a cited conductivity exists."
+    },
+    "properties": {
+     "core_density": {
+      "status": "missing",
+      "grade": "D",
+      "note": "Quarry-specific; measure per IS 9620 (S08) test report."
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "No cited LCA/EPD. Quarried, unfired - low carbon is plausible but UNPROVEN."
+     }
+    },
+    "candidate_unverified": {
+     "k_W_mK": 0.51,
+     "source": "S07",
+     "note": "Reported by an unidentified Malabar study; excluded from all calculations."
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 lists 'Stones from India (not including stone cladding)' - whether quarried laterite blocks qualify must be confirmed with GRIHA."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    },
+    "reported_notes": [
+     {
+      "source": "S10",
+      "text": "Kozhikode lateritic soil blocks: 8% cement by soil weight reported optimum; strength and density rise, water absorption falls with cement. No conductivity reported. Search summary only."
+     }
+    ]
+   },
+   {
+    "id": "BRICK",
+    "name": "Burnt clay brick (solid)",
+    "family": "Traditional / conventional masonry",
+    "kerala_relevance": "Widely established regional benchmark.",
+    "maturity": "Established",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "clay_brick_1920",
+       "t_mm": 230
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ]
+    },
+    "properties": {
+     "core_density": {
+      "value": 1920,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #1"
+     },
+     "gwp": {
+      "value": 642.87,
+      "unit": "kgCO2e/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S04",
+      "basis": "Auroville Earth Institute, 'country fired bricks', India (Auroville/Pondicherry), 2005. Page states 'Kg of CO2', not CO2e; modules not stated. Same source and basis as the CSEB figure.",
+      "alternative": {
+       "value_range": [
+        0.1,
+        0.22
+       ],
+       "unit": "kgCO2/kg",
+       "source": "S05",
+       "note": "Evora paper Table 1, ceramic block: ICE 2011 (UK) 0.22, Portugal 0.112 and 0.100, UM 0.19. At 1920 kg/m3 x 230 mm this gives 44-97 kgCO2/m2 versus 147.9 from Auroville."
+      }
+     },
+     "masonry_unit": {
+      "price_inr": 15,
+      "l_mm": 228.6,
+      "h_mm": 76.2,
+      "joint_mm": 10,
+      "wythes": 2,
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S11",
+      "unit": "INR/piece",
+      "value": 15,
+      "note": "Kochi, red clay brick 9x4x3 in, modelled estimate; 10 mm mortar joints assumed; 230 mm wall = two stretcher wythes."
+     }
+    },
+    "rating_notes": [],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "AAC",
+    "name": "AAC (autoclaved aerated concrete) blocks",
+    "family": "Manufactured masonry",
+    "kerala_relevance": "Established Indian market; growing Kerala use (supplier evidence not yet collected).",
+    "maturity": "Established",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "aac_642",
+       "t_mm": 200
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ]
+    },
+    "properties": {
+     "core_density": {
+      "value": 642,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #9"
+     },
+     "gwp": {
+      "value": 0.28,
+      "unit": "kgCO2e/kg",
+      "grade": "C",
+      "status": "read_primary",
+      "source": "S03",
+      "basis": "UK average AAC (61% pfa) from an APA/British Precast EPD via Climatiq; GWP method and lifecycle modules not stated by aggregator; not an Indian product."
+     },
+     "masonry_unit": {
+      "price_inr": 83,
+      "l_mm": 600,
+      "h_mm": 200,
+      "joint_mm": 0,
+      "wythes": 1,
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S11",
+      "unit": "INR/piece",
+      "value": 83,
+      "note": "Kochi, 600x200x200 mm block, modelled retail estimate (dealer range reported as Rs 64-102). Thin-bed joint assumed 0 mm; 200 mm wall = one block thick."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 accepts AAC blocks only with at least 40% fly ash content by weight (or a valid GRIHA Product Catalogue certificate, 19.2.10)."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "CSEB",
+    "name": "Compressed stabilised earth block (CSEB)",
+    "family": "Earth / low-carbon masonry",
+    "kerala_relevance": "Auroville/Indian sustainable-construction practice; niche uptake in Kerala.",
+    "maturity": "Established but niche",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "cseb_1800",
+       "t_mm": 230
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "ENS Table 46 value used (1.201 W/mK at 1800 kg/m3). Auroville's own table gives 0.81-0.93 W/mK, which would give U about 2.1-2.2 W/m2K instead of 2.53."
+    },
+    "properties": {
+     "core_density": {
+      "value": 1800,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #11 (soil-cement block, Balaji et al. 2015)"
+     },
+     "gwp": {
+      "value": 49.37,
+      "unit": "kgCO2e/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S04",
+      "basis": "Auroville hand-press CSEB, 5% cement, 2005 (India). Page also shows 51.5 kg/m3 in a second table; unit kg CO2, modules not stated."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 lists adobe / stabilised adobe / CSEB / stabilised mud blocks as alternative wall materials."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "HCB",
+    "name": "Hollow concrete blocks",
+    "family": "Manufactured masonry",
+    "kerala_relevance": "Common manufactured masonry in Kerala.",
+    "maturity": "Established",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": null,
+       "label": "Hollow concrete block core (no cited conductivity)",
+       "t_mm": 200
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "ENS Table 46 lists SOLID concrete blocks only. Hollow-block conductivity depends on voids; use a product test report, or ENS Eq. 2 (k = 0.1009 exp(0.0011 rho), valid 600-2100 kg/m3) if measured dry density is available."
+    },
+    "properties": {
+     "core_density": {
+      "status": "missing",
+      "grade": "D",
+      "note": "Product-specific test report needed."
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "Cement content drives GWP; need product EPD or mix design."
+     },
+     "masonry_unit": {
+      "price_inr": 50,
+      "l_mm": 400,
+      "h_mm": 200,
+      "joint_mm": 0,
+      "wythes": 1,
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S11",
+      "unit": "INR/piece",
+      "value": 50,
+      "note": "Thiruvananthapuram, 400x200x200 mm hollow concrete block, modelled estimate. No cited conductivity yet, so no U-value."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 accepts hollow concrete blocks only with at least 40% fly ash content by weight."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "FAB",
+    "name": "Fly ash bricks",
+    "family": "Manufactured low-carbon masonry",
+    "kerala_relevance": "Industrial by-product route; Kerala supply to be verified.",
+    "maturity": "Established",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "fly_ash_brick_1650",
+       "t_mm": 230
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ]
+    },
+    "properties": {
+     "core_density": {
+      "value": 1650,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #6 (Gourav et al. 2017)"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "No cited value."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3: concrete blocks need >=40% fly ash; check that a given brick product meets a BIS-recognised waste-content basis."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "PCB",
+    "name": "Perforated / hollow clay blocks",
+    "family": "Manufactured clay masonry",
+    "kerala_relevance": "Hollow clay blocks are an accepted GRIHA alternative wall material; Kerala supply to be verified.",
+    "maturity": "Established",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "hollow_clay_1520",
+       "t_mm": 200
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "Uses the ENS entry 'Resource efficient (hollow) brick' as the nearest match; equivalence with a specific perforated block product is an assumption."
+    },
+    "properties": {
+     "core_density": {
+      "value": 1520,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #5 (CBERD database)"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "No cited value."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 lists hollow clay blocks as alternative wall material."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "GEO",
+    "name": "Geopolymer blocks",
+    "family": "Emerging low-carbon masonry",
+    "kerala_relevance": "Research / early-commercial; local plant and activator supply unverified.",
+    "maturity": "Emerging",
+    "assembly": {
+     "layers": [],
+     "note": "No cited conductivity or density."
+    },
+    "properties": {
+     "core_density": {
+      "status": "missing",
+      "grade": "D"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "Do not assume low carbon without an LCA boundary."
+     }
+    },
+    "rating_notes": [],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "RAB",
+    "name": "Recycled aggregate blocks",
+    "family": "Recycled-content masonry",
+    "kerala_relevance": "C&D-waste reuse; Kerala plants and product standards to be verified.",
+    "maturity": "Emerging / niche",
+    "assembly": {
+     "layers": [],
+     "note": "No cited conductivity or density."
+    },
+    "properties": {
+     "core_density": {
+      "status": "missing",
+      "grade": "D"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D"
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 accepts C&D waste blocks with at least 30% C&D waste by weight."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "SAND",
+    "name": "Insulated sandwich wall (illustrative)",
+    "family": "Composite assembly",
+    "kerala_relevance": "Not a Kerala norm; included as a thermal-performance comparator.",
+    "maturity": "Established (generic)",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "clay_brick_1920",
+       "t_mm": 115
+      },
+      {
+       "ref": "eps_24",
+       "t_mm": 50
+      },
+      {
+       "ref": "clay_brick_1920",
+       "t_mm": 115
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "ILLUSTRATIVE geometry chosen by the researcher (115 + 50 EPS + 115), not a specified product. Moisture/fire behaviour of EPS in Kerala is not assessed."
+    },
+    "properties": {
+     "core_density": {
+      "status": "missing",
+      "grade": "D"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "EPS and masonry A1-A3 not cited."
+     }
+    },
+    "rating_notes": [],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "CLC",
+    "name": "Cellular lightweight concrete (CLC / foam concrete) blocks",
+    "family": "Lightweight concrete",
+    "kerala_relevance": "Produced by small and medium plants in Kerala; a lightweight alternative to AAC.",
+    "maturity": "Established (regional)",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "cellular_concrete_704",
+       "t_mm": 200
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "ENS Table 46 'cellular concrete' 704 kg/m3 (k 0.188). Product density varies by plant; measure per IS test."
+    },
+    "properties": {
+     "core_density": {
+      "value": 704,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #21"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "No cited LCA/EPD for CLC found; do not borrow the AAC factor."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 lists concrete blocks (hollow, solid or AAC) with >=40% fly ash by weight - CLC fly-ash content must be confirmed per product."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "BRKCOIR",
+    "name": "Burnt clay brick with inner 25 mm coir board (illustrative)",
+    "family": "Composite / bio-based insulation",
+    "kerala_relevance": "Coir is a Kerala-produced fibre; coir boards appear in ENS Table 46 insulating materials.",
+    "maturity": "Emerging / illustrative",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "clay_brick_1920",
+       "t_mm": 230
+      },
+      {
+       "ref": "coir_board_97",
+       "t_mm": 25
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "Illustrative build-up. Availability of a 25 mm coir board of this density, its fire/moisture behaviour and its bonding to masonry are NOT verified."
+    },
+    "properties": {
+     "core_density": {
+      "value": 1920,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #1"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "Coir-board carbon not collected; brick factor is for the brick only and the layer is not carbon-scored."
+     }
+    },
+    "rating_notes": [
+     "Coconut-pith / coir board conductivities are from ENS Table 46; no rating credit is implied."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   },
+   {
+    "id": "SAND_CLC",
+    "name": "Insulated sandwich: 2 x 100 mm CLC leaves with 50 mm EPS (illustrative)",
+    "family": "Insulated composite",
+    "kerala_relevance": "Illustrative high-thermal-performance reference build-up.",
+    "maturity": "Illustrative",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "cellular_concrete_704",
+       "t_mm": 100
+      },
+      {
+       "ref": "eps_24",
+       "t_mm": 50
+      },
+      {
+       "ref": "cellular_concrete_704",
+       "t_mm": 100
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "Reference only; not a recommended construction."
+    },
+    "properties": {
+     "core_density": {
+      "value": 704,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #21"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "No cited carbon factor for CLC or EPS."
+     }
+    },
+    "rating_notes": [],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
+   }
+  ],
+  "unfilled_criteria": {
+   "cost": "Only masonry-unit price (secondary listings, S11/S12) is held; installed cost still needs 8-12 dealer quotations.",
+   "service_life": "No evidence-graded value collected.",
+   "availability": "Awaiting supplier survey.",
+   "maintenance": "Awaiting expert / inspection evidence."
+  },
+  "legacy_indicative": {
+   "_note": "Original prototype values, all verified=false, kept only for the 'legacy parity' demo. Do not treat as findings. Note: legacy U-values differ from ENS-method calculations (e.g. CSEB 1.60 legacy vs calculated value).",
+   "materials": {
+    "M1": {
+     "maps_to": "BRICK",
+     "u_value": 2.2,
+     "gwp_core": 95.0,
+     "cost": 2100,
+     "service_life": 75,
+     "availability": 5,
+     "maintenance": 2
+    },
+    "M2": {
+     "maps_to": "LAT",
+     "u_value": 1.85,
+     "gwp_core": 42.0,
+     "cost": 1850,
+     "service_life": 80,
+     "availability": 5,
+     "maintenance": 3
+    },
+    "M3": {
+     "maps_to": "AAC",
+     "u_value": 0.62,
+     "gwp_core": 78.0,
+     "cost": 2400,
+     "service_life": 60,
+     "availability": 4,
+     "maintenance": 2
+    },
+    "M4": {
+     "maps_to": "CSEB",
+     "u_value": 1.6,
+     "gwp_core": 28.0,
+     "cost": 1950,
+     "service_life": 55,
+     "availability": 2,
+     "maintenance": 3
+    },
+    "M5": {
+     "maps_to": "HCB",
+     "u_value": 1.95,
+     "gwp_core": 88.0,
+     "cost": 1900,
+     "service_life": 65,
+     "availability": 5,
+     "maintenance": 2
+    }
+   },
+   "names": {
+    "M1": "Burnt clay brick wall (230mm, plastered)",
+    "M2": "Laterite block wall (200mm, plastered)",
+    "M3": "AAC block wall (200mm, plastered)",
+    "M4": "CSEB wall (230mm, plastered)",
+    "M5": "Hollow concrete block wall (200mm, plastered)"
+   }
+  },
+  "layer_roles": {
+   "non_core": [
+    "cement_plaster",
+    "eps_24",
+    "coir_board_97",
+    "coconut_pith_board_520",
+    "wood_wool_board_398",
+    "foam_concrete_400"
+   ]
+  },
+  "thermal_dynamic": {
+   "period_s": 86400,
+   "note": "EN ISO 13786 periodic heat-transfer matrices; indicators only - NOT scored (see S14 double-counting warning). Uses Table 46 specific heat."
+  },
+  "retv": {
+   "limit_w_m2": 15,
+   "coefficients": {
+    "a": 5.15,
+    "b": 1.31,
+    "c": 65.21
+   },
+   "source": "S01",
+   "locator": "Sec. 9.5.2 and Table 48 (warm-humid); omega: Table 49 (lat < 23.5 N)",
+   "omega_lat_lt_23_5": {
+    "N": 0.659,
+    "NE": 0.906,
+    "E": 1.155,
+    "SE": 1.125,
+    "S": 0.966,
+    "SW": 1.124,
+    "W": 1.156,
+    "NW": 0.908
+   },
+   "formula_note": "RETV = (1/A_envelope) [ a*sum(A_op*U_op*w) + b*sum(A_win*U_win*w) + c*sum(A_win*SHGC_eq*w) ]. Eq. 4 is an image in the ENS PDF; the form here follows the variable list printed beneath it (Sec. 9.5.3) and must be checked against the printed equation."
+  }
+ },
+ "sources": [
+  {
+   "id": "S01",
+   "title": "Eco-Niwas Samhita (ENS) 2024 - Energy Conservation and Sustainable Building Code for Residential Buildings",
+   "org": "Bureau of Energy Efficiency (BEE), Government of India",
+   "type": "regulation",
+   "url": "https://beeindia.gov.in/WriteReadData/L45218/0405504518282114.pdf",
+   "locator": "Sec. 5.2.1 (limits), 9.3 + Tables 45-47 (U-value method, conductivities), Eq. 1-2 (k from density), 9.5 + Table 48 (RETV), city table (Kochi, Trivandrum = Warm-Humid)",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "Table 46 cites ASHRAE 2009, Gourav et al. 2017, BIS SP41 1987, CBERD/MNRE database and Balaji et al. 2015 as its own sources."
+  },
+  {
+   "id": "S02",
+   "title": "GRIHA V.2019 Volume 1: Introduction to National Rating System - GRIHA (3rd ed., 2021)",
+   "org": "GRIHA Council and TERI",
+   "type": "rating_manual",
+   "url": "https://www.grihaindia.org/sites/default/files/pdf/Manuals/griha-manual-vol1.pdf",
+   "locator": "Table 6 (rating structure); Criterion 11 p.65; Criterion 19 pp.89-91; Criterion 20 pp.92-93",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "Volumes 2-5 (detailed criterion documents, LCA benchmark tables) not read."
+  },
+  {
+   "id": "S03",
+   "title": "AAC concrete block - average strength - 100 mm x 440 mm x 215 mm (emission factor record)",
+   "org": "Climatiq Data Explorer, derived from EPD-BPC-20170093-CCD1-EN (Aircrete Products Association / British Precast)",
+   "type": "epd_derived_aggregator",
+   "url": "https://www.climatiq.io/data/emission-factor/dd345249-f5cb-4eff-b013-c06193143faa",
+   "locator": "1.589 kgCO2e per block; density 600 kg/m3 (=> 0.28 kgCO2e/kg, own arithmetic)",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "UK average mixture (61% pfa), GWP method (AR4/AR5) not stated, lifecycle modules not stated by the aggregator. Original EPD not opened."
+  },
+  {
+   "id": "S04",
+   "title": "Compressed Stabilised Earth Block (carbon emission of CSEB vs fired brick)",
+   "org": "Auroville Earth Institute",
+   "type": "institutional_web",
+   "url": "https://earth-auroville.com/compressed_stabilised_earth_block_en.php",
+   "locator": "Technical-data table: 'Carbon emission (CO2/m3 raw material)' 49.37 (5% cement, hand press); text: CSEB 49.37 vs country fired bricks 642.87 kg CO2/m3; second table gives 51.5 vs 642.9 ('Data for Auroville and Pondicherry, India, 2005'); CSEB conductivity 0.81-0.93 W/mC",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "Page opened and read 2026-11-04 (second attempt). Unit is kg CO2 (not CO2e); lifecycle modules not stated; the page itself gives 49.37 and 51.5 for CSEB in different places. Same-source figures for CSEB and country fired brick, so they are like-for-like with each other. Auroville's own CSEB conductivity (0.81-0.93 W/mK) is lower than the ENS Table 46 value used (1.201 at 1800 kg/m3)."
+  },
+  {
+   "id": "S05",
+   "title": "Comparison of embodied energy and carbon dioxide emissions of brick and concrete based on functional units",
+   "org": "Sazedj, S., Morais, A. J., & Jalali, S. (Univ. of Evora; Technical Univ. of Lisbon; Univ. of Minho)",
+   "type": "peer_reviewed_secondary",
+   "url": "https://dspace.uevora.pt/rdpc/bitstream/10174/14255/1/SazedjCompEnvironUF.pdf",
+   "locator": "Table 1: ceramic block CO2 emission kgCO2/kg - UB(ICE 2011, UK) 0.22; CTCV (Portugal 2004) 0.112; Preceram 0.100; UM 0.19; embodied energy MJ/kg 3.0 / 1.37 / 1.02 / 4.5 / 2.99",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "Opened and read 2026-11-04. Publication year/venue not in the extracted text - add from the repository record. Shows a 2x spread (0.100-0.22 kgCO2/kg) across sources for ceramic block, i.e. the brick factor is highly source-dependent. Not used as the primary brick factor; kept as an alternative/range."
+  },
+  {
+   "id": "S06",
+   "title": "IGBC Addendum on Green Homes GRS Affordable Housing on using Green Products (Jan 2018)",
+   "org": "Indian Green Building Council",
+   "type": "rating_addendum",
+   "url": "https://www.igbc.in/frontend-assets/html_pdfs/abridged/Addendum on Green Homes GRS Affordable Housing on using Green Products.pdf",
+   "locator": "Materials & Resources: recycled content 10% / 20% (2 points); low-VOC paints/adhesives (IEQ)",
+   "accessed": "2026-11-04",
+   "verification": "secondary_reported",
+   "note": "Reported through a search summary. The igbc.in PDF URLs (addendum, Abridged Reference Guide v2.0, Green Homes v3.0 First Addendum) all returned HTTP 404 on 2026-11-04 from two clients, so the text could not be read. Obtain the current Green Homes manual from IGBC directly."
+  },
+  {
+   "id": "S07",
+   "title": "Malabar laterite block study reporting mean thermal conductivity 0.51 W/mK (four quarries)",
+   "org": "unidentified peer-reviewed study",
+   "type": "unidentified",
+   "url": null,
+   "locator": "unknown",
+   "accessed": "2026-11-04",
+   "verification": "secondary_reported",
+   "note": "A search summary reported 0.51 W/mK but the paper could not be identified; later searches did not find the value. Candidates to check: Kasthurba et al. (2007), Constr. Build. Mater. 21(1), 73-82 (reported only as a Malabar laterite study); a core.ac.uk record (HTTP 403 to both clients). NOT used in any calculation."
+  },
+  {
+   "id": "S08",
+   "title": "Bureau of Indian Standards IS 9620 - Specification for laterite stone block for masonry",
+   "org": "BIS",
+   "type": "standard",
+   "url": null,
+   "locator": "whole standard",
+   "accessed": "2026-11-04",
+   "verification": "secondary_reported",
+   "note": "Existence and scope reported by search summary only; standard text not read."
+  },
+  {
+   "id": "S09",
+   "title": "Prototype material_data.json (original indicative demonstration values)",
+   "org": "Irfan Nazar (project file)",
+   "type": "project_file",
+   "url": null,
+   "locator": "09_prototype/material_data.json",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "All values carry verified=false. Retained only for the legacy parity demo."
+  },
+  {
+   "id": "S10",
+   "title": "Stabilization of lateritic soil for masonry applications (Jose & Kasthurba, NIT Calicut), Magazine of Civil Engineering 2021",
+   "org": "Engineering Construction (SPbSTU) / DOAJ",
+   "type": "journal_article",
+   "url": "https://engstroy.spbstu.ru/article/2021.101.9/",
+   "locator": "abstract summary only",
+   "accessed": "2026-11-04",
+   "verification": "search_summary_only",
+   "note": "Kozhikode-district lateritic soil: density, strength and water absorption improve with cement; 8% cement by soil weight reported optimum. No thermal conductivity reported in the summary. Full text not read."
+  },
+  {
+   "id": "S11",
+   "title": "Infralens masonry price pages: Kochi and Thiruvananthapuram (dealer-to-retail modelled estimates)",
+   "org": "infralens.in (aggregator)",
+   "type": "price_aggregator",
+   "url": "https://infralens.in/prices/masonry/kochi",
+   "locator": "search-result summary 2026-11-04; direct page fetch blocked by Cloudflare",
+   "accessed": "2026-11-04",
+   "verification": "search_summary_only",
+   "note": "Per-piece prices: Kochi AAC 600x200x200 ~Rs 83, red clay brick (9x4x3 in) ~Rs 15, fly ash brick ~Rs 7, solid concrete block ~Rs 55; Thiruvananthapuram AAC ~Rs 84, hollow concrete block 400x200x200 ~Rs 50. Modelled estimates, not invoices. Page not opened."
+  },
+  {
+   "id": "S12",
+   "title": "IndiaMART Kerala supplier listings (AAC, interlocking concrete blocks)",
+   "org": "indiamart.com sellers (Wayanad / Kerala)",
+   "type": "price_listing",
+   "url": "https://m.indiamart.com/avassociatekerala/aac-block.html",
+   "locator": "search-result summary 2026-11-04",
+   "accessed": "2026-11-04",
+   "verification": "search_summary_only",
+   "note": "Undated asking prices: AAC about Rs 56-110 per piece depending on size; 600x200x100 mm Birla AAC Rs 40; interlocking concrete block Rs 42 (Wayanad). Not quotations."
+  },
+  {
+   "id": "S13",
+   "title": "NASA POWER climatology (monthly means) for Kochi, Thiruvananthapuram, Kozhikode",
+   "org": "NASA Langley Research Center POWER Project",
+   "type": "reanalysis_dataset",
+   "url": "https://power.larc.nasa.gov/api/temporal/climatology/point",
+   "locator": "data/raw/nasa_power_*.json (T2M, T2M_MAX, T2M_MIN, RH2M, PRECTOTCORR, ALLSKY_SFC_SW_DWN, WS10M)",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "Gridded satellite/reanalysis climatology (community RE), not a station record or an EPW file. Fine for screening; replace with ISHRAE/IMD EPW for simulation."
+  },
+  {
+   "id": "S14",
+   "title": "Sustainable External Wall Material Assessment Framework (categories, criteria, uses) - researcher's framework PDF",
+   "org": "Irfan Nazar (project file)",
+   "type": "project_file",
+   "url": null,
+   "locator": "03_Data/Sustainable_External_Wall_Material_Assessment_Criteria_and_Uses.pdf",
+   "accessed": "2026-11-04",
+   "verification": "opened_and_read",
+   "note": "7 categories, 64 criteria. States itself to be a proposed research framework, not an official GRIHA/IGBC schedule."
+  }
+ ],
+ "ratings": {
+  "_note": "Rating-system and code requirements relevant to external-wall material choice. 'verified' = text read in the primary document on 2026-11-04 (see sources.json). Nothing here awards or implies rating points for any product.",
+  "items": [
+   {
+    "id": "ENS-RETV",
+    "system": "ENS 2024 (BEE)",
+    "ref": "Sec. 5.2.1.4 / 9.5.2",
+    "requirement": "RETV of the building envelope (except roof) <= 15 W/m2 for composite, hot-dry, warm-humid and temperate zones. BEE notes an intended future tightening to 12 W/m2.",
+    "applies_to": "whole envelope (walls + openings), not a single wall material",
+    "source": "S01",
+    "verified": true
+   },
+   {
+    "id": "ENS-ROOF",
+    "system": "ENS 2024 (BEE)",
+    "ref": "Sec. 5.2.1.3",
+    "requirement": "Roof U-value <= 1.2 W/m2K.",
+    "applies_to": "roof",
+    "source": "S01",
+    "verified": true
+   },
+   {
+    "id": "ENS-RETV-COEF",
+    "system": "ENS 2024 (BEE)",
+    "ref": "Table 48",
+    "requirement": "Warm-humid RETV formula coefficients a=5.15, b=1.31, c=65.21 (formula itself, Eq. 4, not transcribed here).",
+    "applies_to": "RETV calculation",
+    "source": "S01",
+    "verified": true
+   },
+   {
+    "id": "ENS-U-METHOD",
+    "system": "ENS 2024 (BEE)",
+    "ref": "Sec. 9.3, Tables 45-47",
+    "requirement": "Wall U-value = 1/(Rsi + sum(t/k) + Rse) with Rsi=0.13, Rse=0.04 m2K/W; Table 46 gives default conductivities; measured values per IS codes may replace them.",
+    "applies_to": "wall assemblies",
+    "source": "S01",
+    "verified": true
+   },
+   {
+    "id": "ENS-K-EQ",
+    "system": "ENS 2024 (BEE)",
+    "ref": "Eq. 1-2",
+    "requirement": "k = 0.0652 exp(0.0012 rho) for solid fired clay brick (1250-2150 kg/m3); k = 0.1009 exp(0.0011 rho) for non-fired units incl. AAC, concrete block, fly ash brick, CSEB (600-2100 kg/m3).",
+    "applies_to": "masonry units with measured dry density",
+    "source": "S01",
+    "verified": true
+   },
+   {
+    "id": "ENS-ZONE",
+    "system": "ENS 2024 (BEE)",
+    "ref": "city climate table",
+    "requirement": "Kochi and Trivandrum are classified Warm-Humid. Kollam is not listed in the extracted table; adjacent-city classification is an inference.",
+    "applies_to": "climate zone",
+    "source": "S01",
+    "verified": true
+   },
+   {
+    "id": "GRIHA-19.1.3",
+    "system": "GRIHA v2019",
+    "ref": "Criterion 19 (max 5 points), appraisal 19.1.3, 1 point",
+    "requirement": "All internal and external walls built from alternative materials: concrete blocks (hollow, solid or AAC) with >=40% fly ash by weight; hollow clay blocks; adobe/stabilised adobe/CSEB/stabilised mud blocks; rammed earth; stones from India (not cladding); bamboo/rapidly renewable material; monolithic concrete wall with >=20% OPC replacement; C&D waste blocks with >=30% C&D waste; dry walls/boards with >=5% recycled content. Evidence: purchase orders, BOQ, mix design or valid GRIHA Product Catalogue certificate (19.2.8-19.2.13).",
+    "applies_to": "wall material class",
+    "source": "S02",
+    "verified": true
+   },
+   {
+    "id": "GRIHA-19.1.4",
+    "system": "GRIHA v2019",
+    "ref": "Criterion 19, appraisal 19.1.4",
+    "requirement": ">=30% replacement of OPC with BIS-recommended waste by weight in masonry mortar and plaster.",
+    "applies_to": "mortar and plaster",
+    "source": "S02",
+    "verified": true
+   },
+   {
+    "id": "GRIHA-20",
+    "system": "GRIHA v2019",
+    "ref": "Criterion 20 (max 5 points)",
+    "requirement": "GWP reduction vs a project-specific GRIHA LCA base case: superstructure 10-15% = 1 point, >15% = 2 points; interiors and finishes 10-15% = 1, 15-30% = 2, >30% = 3. Needs a third-party LCA calculator report, EPDs or GRIHA Product Catalogue certificates.",
+    "applies_to": "building-level LCA",
+    "source": "S02",
+    "verified": true
+   },
+   {
+    "id": "GRIHA-11",
+    "system": "GRIHA v2019",
+    "ref": "Criterion 11 (max 2 points, mandatory part)",
+    "requirement": "Thermal comfort by simulation (NBC 2016 / ASHRAE 55 / Indian Adaptive Comfort): non-AC spaces 60% of occupied hours in warm-humid climate (90% elsewhere), or Alternative 2 natural-ventilation strategies.",
+    "applies_to": "building performance",
+    "source": "S02",
+    "verified": true
+   },
+   {
+    "id": "IGBC-RECYCLED",
+    "system": "IGBC Green Homes (addendum, Jan 2018)",
+    "ref": "Materials & Resources credit",
+    "requirement": "Recycled-content materials at 10% and 20% thresholds (2 points) as reported by a search summary of the addendum.",
+    "applies_to": "material recycled content",
+    "source": "S06",
+    "verified": false,
+    "note": "Not read in primary form; current IGBC Green Homes manual not consulted."
+   }
+  ],
+  "unverified_gaps": [
+   "Current IGBC Green Homes / Green New Buildings envelope and material credits (credit numbers and points).",
+   "GRIHA Volume 5 LCA benchmark tables (Table 20.3c / 20.4c).",
+   "CII GreenPro product listings for Kerala-available wall products.",
+   "ENS 2024 Eq. 4 (RETV) and Table 49 orientation factors - needed to compute RETV for a house."
+  ]
+ },
+ "framework": {
+  "source": "S14",
+  "note": "Transcribed from the researcher's framework PDF. 'role' and 'engine_status' are platform classifications, not part of the PDF. Not an official GRIHA or IGBC schedule.",
+  "categories": [
+   {
+    "name": "01 Environmental sustainability",
+    "criteria": [
+     {
+      "id": "embodied_carbon",
+      "name": "Embodied carbon",
+      "unit": "kg CO2e/m2 finished wall",
+      "preferred": "lower",
+      "engine_status": "partial",
+      "role": "decision_criterion",
+      "note": "core-only, mixed boundaries (gwp_core)"
+     },
+     {
+      "id": "embodied_energy",
+      "name": "Embodied energy",
+      "unit": "MJ/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "recycled_content",
+      "name": "Recycled content",
+      "unit": "% by mass",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "GRIHA 19.1.3 / IGBC thresholds apply"
+     },
+     {
+      "id": "renewable_content",
+      "name": "Renewable material content",
+      "unit": "% by mass",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "carbon_storage",
+      "name": "Carbon storage",
+      "unit": "kg CO2e/m2",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "report separately from emissions"
+     },
+     {
+      "id": "mfg_water",
+      "name": "Manufacturing water consumption",
+      "unit": "L/m2 or L/kg",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "mfg_waste",
+      "name": "Manufacturing waste",
+      "unit": "kg/m2 or %",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "eol_recyclability",
+      "name": "End-of-life recyclability",
+      "unit": "% / pathway",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "local recovery route must exist"
+     }
+    ]
+   },
+   {
+    "name": "02 Thermal and energy performance",
+    "criteria": [
+     {
+      "id": "conductivity",
+      "name": "Thermal conductivity",
+      "unit": "W/m.K",
+      "preferred": "lower",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "ENS Table 46 dry-state"
+     },
+     {
+      "id": "u_value",
+      "name": "Thermal transmittance (U-value)",
+      "unit": "W/m2.K",
+      "preferred": "lower",
+      "engine_status": "implemented",
+      "role": "decision_criterion",
+      "note": "scored"
+     },
+     {
+      "id": "r_value",
+      "name": "Thermal resistance",
+      "unit": "m2.K/W",
+      "preferred": "higher",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "R_T output"
+     },
+     {
+      "id": "specific_heat",
+      "name": "Specific heat capacity",
+      "unit": "J/kg.K",
+      "preferred": "context",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "ENS Table 46"
+     },
+     {
+      "id": "vol_heat_capacity",
+      "name": "Volumetric heat capacity",
+      "unit": "kJ/m3.K",
+      "preferred": "context",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "density x cp"
+     },
+     {
+      "id": "diffusivity",
+      "name": "Thermal diffusivity",
+      "unit": "m2/s",
+      "preferred": "context",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "k/(rho cp)"
+     },
+     {
+      "id": "thermal_lag",
+      "name": "Thermal lag",
+      "unit": "h",
+      "preferred": "project",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "EN ISO 13786, indicator only"
+     },
+     {
+      "id": "decrement_factor",
+      "name": "Decrement factor",
+      "unit": "-",
+      "preferred": "lower",
+      "engine_status": "implemented",
+      "role": "material_property",
+      "note": "EN ISO 13786, indicator only"
+     },
+     {
+      "id": "solar_heat_gain",
+      "name": "Solar heat gain",
+      "unit": "kWh/m2",
+      "preferred": "lower",
+      "engine_status": "partial",
+      "role": "simulation_input",
+      "note": "RETV orientation weighting; no hourly simulation yet"
+     }
+    ]
+   },
+   {
+    "name": "03 Moisture and climatic suitability",
+    "criteria": [
+     {
+      "id": "water_absorption",
+      "name": "Water absorption",
+      "unit": "% by mass",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": "IS test values per product"
+     },
+     {
+      "id": "capillary_absorption",
+      "name": "Capillary water absorption",
+      "unit": "kg/m2.sqrt(s)",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": ""
+     },
+     {
+      "id": "vapour_permeability",
+      "name": "Vapour permeability",
+      "unit": "test unit",
+      "preferred": "context",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": ""
+     },
+     {
+      "id": "mu_value",
+      "name": "Vapour diffusion resistance (mu)",
+      "unit": "-",
+      "preferred": "context",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": ""
+     },
+     {
+      "id": "moisture_storage",
+      "name": "Moisture storage",
+      "unit": "kg/m3",
+      "preferred": "context",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": ""
+     },
+     {
+      "id": "drying_potential",
+      "name": "Drying potential",
+      "unit": "time curve",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "needs hygrothermal simulation"
+     },
+     {
+      "id": "driving_rain",
+      "name": "Driving-rain resistance",
+      "unit": "classification",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "assembly evidence required"
+     },
+     {
+      "id": "dimensional_stability",
+      "name": "Dimensional stability",
+      "unit": "% / mm per m",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "efflorescence",
+      "name": "Efflorescence resistance",
+      "unit": "severity",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "mould",
+      "name": "Mould susceptibility",
+      "unit": "risk class",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     }
+    ]
+   },
+   {
+    "name": "04 Durability and lifecycle performance",
+    "criteria": [
+     {
+      "id": "service_life",
+      "name": "Expected service life",
+      "unit": "years",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "decision_criterion",
+      "note": "scored criterion, not yet evidenced"
+     },
+     {
+      "id": "weathering",
+      "name": "Weathering resistance",
+      "unit": "classification",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "water_deterioration",
+      "name": "Water-related deterioration",
+      "unit": "risk class",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "simulation_input",
+      "note": ""
+     },
+     {
+      "id": "chemical_salt",
+      "name": "Chemical and salt resistance",
+      "unit": "classification",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "coastal Kerala relevance"
+     },
+     {
+      "id": "biological_resistance",
+      "name": "Biological resistance",
+      "unit": "risk class",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "termite / algae / fungi"
+     },
+     {
+      "id": "crack_susceptibility",
+      "name": "Crack susceptibility",
+      "unit": "risk class",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "maintenance_frequency",
+      "name": "Maintenance frequency",
+      "unit": "years",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "decision_criterion",
+      "note": "scored criterion, not yet evidenced"
+     },
+     {
+      "id": "repairability",
+      "name": "Repairability",
+      "unit": "rubric",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "replacement_frequency",
+      "name": "Replacement frequency",
+      "unit": "number / period",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "coating_durability",
+      "name": "Coating durability",
+      "unit": "years",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     }
+    ]
+   },
+   {
+    "name": "05 Economic performance",
+    "criteria": [
+     {
+      "id": "raw_material_cost",
+      "name": "Raw material cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "partial",
+      "role": "decision_criterion",
+      "note": "masonry unit price x pieces/m2 (grade C)"
+     },
+     {
+      "id": "installation_cost",
+      "name": "Installation cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "mortar_cost",
+      "name": "Mortar / adhesive cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "finishing_cost",
+      "name": "Finishing cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "transport_cost",
+      "name": "Transportation cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "maintenance_cost",
+      "name": "Maintenance cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "replacement_cost",
+      "name": "Replacement cost",
+      "unit": "INR/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "lifecycle_cost",
+      "name": "Lifecycle cost",
+      "unit": "INR/m2 over period",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "needs study period, base year, discount rate"
+     },
+     {
+      "id": "payback",
+      "name": "Payback period",
+      "unit": "years",
+      "preferred": "shorter",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     }
+    ]
+   },
+   {
+    "name": "06 Resource and supply-chain efficiency",
+    "criteria": [
+     {
+      "id": "local_availability",
+      "name": "Local availability",
+      "unit": "evidence score",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "decision_criterion",
+      "note": "scored criterion; supplier survey"
+     },
+     {
+      "id": "transport_distance",
+      "name": "Transportation distance",
+      "unit": "km",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "lead_time",
+      "name": "Supply lead time",
+      "unit": "days",
+      "preferred": "shorter",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "energy_source",
+      "name": "Manufacturing energy source",
+      "unit": "% by source",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "virgin_material",
+      "name": "Virgin material consumption",
+      "unit": "kg/m2",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "water_efficiency",
+      "name": "Water efficiency",
+      "unit": "L/kg",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "construction_wastage",
+      "name": "Construction wastage",
+      "unit": "% input",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "reuse_potential",
+      "name": "Reuse potential",
+      "unit": "% / pathway",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "recyclability",
+      "name": "Recyclability",
+      "unit": "% / pathway",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "supply_reliability",
+      "name": "Supply reliability",
+      "unit": "evidence score",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     }
+    ]
+   },
+   {
+    "name": "07 Health, safety and indoor environmental quality",
+    "criteria": [
+     {
+      "id": "voc",
+      "name": "VOC emissions",
+      "unit": "mg/m3",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": "product-specific (finishes)"
+     },
+     {
+      "id": "formaldehyde",
+      "name": "Formaldehyde emissions",
+      "unit": "mg/m3",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "material_property",
+      "note": ""
+     },
+     {
+      "id": "hazardous_substances",
+      "name": "Hazardous substance content",
+      "unit": "declaration",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "fire_resistance",
+      "name": "Fire resistance",
+      "unit": "minutes",
+      "preferred": "meet",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "mandatory eligibility check"
+     },
+     {
+      "id": "fire_reaction",
+      "name": "Fire reaction classification",
+      "unit": "class",
+      "preferred": "suitable",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": "mandatory eligibility check"
+     },
+     {
+      "id": "acoustic",
+      "name": "Acoustic insulation",
+      "unit": "Rw dB",
+      "preferred": "higher",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "iaq",
+      "name": "Indoor air quality impact",
+      "unit": "declaration",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     },
+     {
+      "id": "biological_safety",
+      "name": "Biological safety",
+      "unit": "assessment",
+      "preferred": "lower",
+      "engine_status": "data_needed",
+      "role": "descriptor_or_evidence",
+      "note": ""
+     }
+    ]
+   }
+  ],
+  "count": 64
+ },
+ "climate": {
+  "source": "S13",
+  "ens_zone_note": "ENS 2024 lists Kochi and Trivandrum as Warm-Humid (S01). Kozhikode's zone is an inference from its neighbours.",
+  "cities": {
+   "kochi": {
+    "name": "Kochi",
+    "lat": 9.97,
+    "lon": 76.27,
+    "grid_elevation_m": 47.32,
+    "monthly": {
+     "ALLSKY_SFC_SW_DWN": [
+      5.629,
+      6.197,
+      6.358,
+      6.033,
+      5.186,
+      4.43,
+      4.374,
+      4.745,
+      5.191,
+      5.05,
+      4.805,
+      5.011
+     ],
+     "PRECTOTCORR": [
+      0.43,
+      0.95,
+      1.75,
+      4.29,
+      9.15,
+      16.47,
+      14.15,
+      11.28,
+      9.78,
+      11.54,
+      5.8,
+      1.23
+     ],
+     "RH2M": [
+      65.69,
+      62.59,
+      67.3,
+      76.26,
+      82.3,
+      87.03,
+      89.42,
+      89.44,
+      87.38,
+      84.78,
+      80.12,
+      72.71
+     ],
+     "T2M": [
+      27.33,
+      28.61,
+      29.42,
+      29.02,
+      28.25,
+      26.97,
+      26.08,
+      25.91,
+      26.18,
+      26.57,
+      26.78,
+      26.74
+     ],
+     "T2M_MAX": [
+      34.57,
+      36.55,
+      37.58,
+      37.36,
+      36.11,
+      32.41,
+      29.43,
+      29.61,
+      30.58,
+      31.39,
+      32.14,
+      34.06
+     ],
+     "T2M_MIN": [
+      19.73,
+      20.41,
+      22.2,
+      24.81,
+      24.49,
+      23.92,
+      23.08,
+      23.41,
+      22.84,
+      22.94,
+      21.31,
+      20.01
+     ],
+     "WS10M": [
+      2.12,
+      2.35,
+      2.72,
+      2.86,
+      3.63,
+      4.36,
+      4.24,
+      3.99,
+      3.6,
+      2.82,
+      2.1,
+      2.15
+     ]
+    },
+    "units": {
+     "T2M": "C",
+     "T2M_MAX": "C (monthly mean of daily max, reanalysis grid)",
+     "T2M_MIN": "C",
+     "RH2M": "%",
+     "PRECTOTCORR": "mm/day",
+     "ALLSKY_SFC_SW_DWN": "kWh/m2/day horizontal",
+     "WS10M": "m/s"
+    }
+   },
+   "thiruvananthapuram": {
+    "name": "Thiruvananthapuram",
+    "lat": 8.52,
+    "lon": 76.95,
+    "grid_elevation_m": 86.25,
+    "monthly": {
+     "ALLSKY_SFC_SW_DWN": [
+      5.613,
+      6.215,
+      6.395,
+      6.054,
+      5.236,
+      4.862,
+      4.944,
+      5.287,
+      5.53,
+      5.137,
+      4.672,
+      4.932
+     ],
+     "PRECTOTCORR": [
+      0.51,
+      0.75,
+      1.71,
+      4.1,
+      6.52,
+      8.3,
+      6.08,
+      5.23,
+      6.88,
+      9.39,
+      7.41,
+      2.01
+     ],
+     "RH2M": [
+      72.11,
+      65.79,
+      67.29,
+      74.97,
+      81.59,
+      86.83,
+      89.01,
+      88.54,
+      87.01,
+      84.92,
+      82.66,
+      80.31
+     ],
+     "T2M": [
+      26.23,
+      27.82,
+      29.03,
+      28.9,
+      28.13,
+      26.84,
+      25.96,
+      25.92,
+      26.15,
+      26.37,
+      26.31,
+      25.76
+     ],
+     "T2M_MAX": [
+      33.4,
+      35.32,
+      36.58,
+      36.77,
+      34.47,
+      31.41,
+      29.71,
+      29.47,
+      31.42,
+      31.4,
+      31.8,
+      33.15
+     ],
+     "T2M_MIN": [
+      19.04,
+      19.79,
+      22.16,
+      24.45,
+      24.42,
+      24.03,
+      23.33,
+      23.19,
+      22.85,
+      23.49,
+      20.73,
+      18.86
+     ],
+     "WS10M": [
+      3.59,
+      3.13,
+      2.88,
+      3.08,
+      4.75,
+      5.57,
+      5.53,
+      5.35,
+      4.8,
+      3.61,
+      3.0,
+      3.84
+     ]
+    },
+    "units": {
+     "T2M": "C",
+     "T2M_MAX": "C (monthly mean of daily max, reanalysis grid)",
+     "T2M_MIN": "C",
+     "RH2M": "%",
+     "PRECTOTCORR": "mm/day",
+     "ALLSKY_SFC_SW_DWN": "kWh/m2/day horizontal",
+     "WS10M": "m/s"
+    }
+   },
+   "kozhikode": {
+    "name": "Kozhikode",
+    "lat": 11.25,
+    "lon": 75.78,
+    "grid_elevation_m": 165.2,
+    "monthly": {
+     "ALLSKY_SFC_SW_DWN": [
+      5.556,
+      6.154,
+      6.465,
+      6.25,
+      5.521,
+      4.071,
+      4.006,
+      4.52,
+      5.173,
+      4.987,
+      4.993,
+      5.114
+     ],
+     "PRECTOTCORR": [
+      0.14,
+      0.25,
+      0.93,
+      2.89,
+      7.42,
+      19.36,
+      18.6,
+      13.45,
+      9.06,
+      8.25,
+      4.02,
+      0.81
+     ],
+     "RH2M": [
+      65.57,
+      62.87,
+      66.41,
+      74.56,
+      81.19,
+      87.13,
+      89.95,
+      90.3,
+      88.18,
+      84.81,
+      79.09,
+      71.55
+     ],
+     "T2M": [
+      26.48,
+      27.65,
+      28.67,
+      28.62,
+      27.86,
+      26.42,
+      25.51,
+      25.24,
+      25.47,
+      25.97,
+      26.12,
+      25.91
+     ],
+     "T2M_MAX": [
+      34.27,
+      35.65,
+      36.6,
+      36.64,
+      36.67,
+      32.47,
+      29.61,
+      28.81,
+      29.7,
+      31.07,
+      32.23,
+      33.57
+     ],
+     "T2M_MIN": [
+      19.59,
+      20.14,
+      21.79,
+      24.13,
+      22.88,
+      23.19,
+      22.76,
+      22.35,
+      22.0,
+      21.2,
+      19.44,
+      18.41
+     ],
+     "WS10M": [
+      2.23,
+      2.48,
+      2.63,
+      2.59,
+      3.13,
+      3.83,
+      3.88,
+      3.6,
+      3.04,
+      2.41,
+      1.88,
+      1.95
+     ]
+    },
+    "units": {
+     "T2M": "C",
+     "T2M_MAX": "C (monthly mean of daily max, reanalysis grid)",
+     "T2M_MIN": "C",
+     "RH2M": "%",
+     "PRECTOTCORR": "mm/day",
+     "ALLSKY_SFC_SW_DWN": "kWh/m2/day horizontal",
+     "WS10M": "m/s"
+    }
+   }
+  }
+ },
+ "climate_summary": {
+  "kochi": {
+   "city": "Kochi",
+   "lat": 9.97,
+   "source": "S13",
+   "t_mean_c": 27.32166666666667,
+   "rh_mean_pct": 78.75166666666667,
+   "rain_mm_year": 2652.4674999999997,
+   "ghi_kwh_m2_day": 5.25075,
+   "hottest_month": "MAR",
+   "t_max_hottest": 37.58,
+   "t_min_hottest": 22.2,
+   "wet_months": [
+    "JUN",
+    "JUL",
+    "AUG",
+    "OCT"
+   ],
+   "humid_months": [
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV"
+   ],
+   "cdd_base_c": 26.0,
+   "cdd_year": 482.3224999999999,
+   "peak_rain_month": "JUN",
+   "moisture_flag": "Heavy monsoon wetting and high humidity: unrendered or unprotected porous masonry needs assembly-level driving-rain/moisture evidence before use (not scored)."
+  },
+  "thiruvananthapuram": {
+   "city": "Thiruvananthapuram",
+   "lat": 8.52,
+   "source": "S13",
+   "t_mean_c": 26.951666666666668,
+   "rh_mean_pct": 80.08583333333333,
+   "rain_mm_year": 1796.8375,
+   "ghi_kwh_m2_day": 5.406416666666666,
+   "hottest_month": "APR",
+   "t_max_hottest": 36.77,
+   "t_min_hottest": 24.45,
+   "wet_months": [],
+   "humid_months": [
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC"
+   ],
+   "cdd_base_c": 26.0,
+   "cdd_year": 355.9749999999999,
+   "peak_rain_month": "OCT",
+   "moisture_flag": "Heavy monsoon wetting and high humidity: unrendered or unprotected porous masonry needs assembly-level driving-rain/moisture evidence before use (not scored)."
+  },
+  "kozhikode": {
+   "city": "Kozhikode",
+   "lat": 11.25,
+   "source": "S13",
+   "t_mean_c": 26.66,
+   "rh_mean_pct": 78.4675,
+   "rain_mm_year": 2604.5625,
+   "ghi_kwh_m2_day": 5.234166666666667,
+   "hottest_month": "MAY",
+   "t_max_hottest": 36.67,
+   "t_min_hottest": 22.88,
+   "wet_months": [
+    "JUN",
+    "JUL",
+    "AUG"
+   ],
+   "humid_months": [
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT"
+   ],
+   "cdd_base_c": 26.0,
+   "cdd_year": 296.72250000000014,
+   "peak_rain_month": "JUN",
+   "moisture_flag": "Heavy monsoon wetting and high humidity: unrendered or unprotected porous masonry needs assembly-level driving-rain/moisture evidence before use (not scored)."
+  }
+ },
+ "sample_project": {
+  "site": {
+   "lat": 9.975,
+   "lon": 76.27222222222223
+  },
+  "true_north_ccw_deg": 15.0,
+  "length_scale_to_m": 1.0,
+  "walls": [
+   {
+    "id": "WALL0010000000000000000",
+    "name": "S wall",
+    "external": true,
+    "area_m2": 26.4,
+    "area_source": "NetSideArea",
+    "azimuth_deg": 195.0,
+    "orientation": "S",
+    "orientation_source": "placement_assumed",
+    "layers": [
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     },
+     {
+      "material": "Burnt clay brick",
+      "t_mm": 230.0,
+      "catalogue_ref": "clay_brick_1920"
+     },
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     }
+    ],
+    "u_value": 2.2832041764495656,
+    "u_status": "derived"
+   },
+   {
+    "id": "WALL0020000000000000000",
+    "name": "E wall",
+    "external": true,
+    "area_m2": 22.56,
+    "area_source": "NetSideArea",
+    "azimuth_deg": 105.0,
+    "orientation": "E",
+    "orientation_source": "placement_assumed",
+    "layers": [
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     },
+     {
+      "material": "Burnt clay brick",
+      "t_mm": 230.0,
+      "catalogue_ref": "clay_brick_1920"
+     },
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     }
+    ],
+    "u_value": 2.2832041764495656,
+    "u_status": "derived"
+   },
+   {
+    "id": "WALL0030000000000000000",
+    "name": "N wall",
+    "external": true,
+    "area_m2": 28.92,
+    "area_source": "NetSideArea",
+    "azimuth_deg": 15.0,
+    "orientation": "N",
+    "orientation_source": "placement_assumed",
+    "layers": [
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     },
+     {
+      "material": "AAC block",
+      "t_mm": 200.0,
+      "catalogue_ref": "aac_642"
+     },
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     }
+    ],
+    "u_value": 0.7750474268453471,
+    "u_status": "derived"
+   },
+   {
+    "id": "WALL0040000000000000000",
+    "name": "W wall",
+    "external": true,
+    "area_m2": 22.56,
+    "area_source": "NetSideArea",
+    "azimuth_deg": 285.0,
+    "orientation": "W",
+    "orientation_source": "placement_assumed",
+    "layers": [
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     },
+     {
+      "material": "Burnt clay brick",
+      "t_mm": 230.0,
+      "catalogue_ref": "clay_brick_1920"
+     },
+     {
+      "material": "Cement plaster",
+      "t_mm": 12.0,
+      "catalogue_ref": "cement_plaster"
+     }
+    ],
+    "u_value": 2.2832041764495656,
+    "u_status": "derived"
+   }
+  ],
+  "openings": [
+   {
+    "id": "WIN110000000000000000000",
+    "name": "Window S1",
+    "type": "window",
+    "host_wall": "WALL0010000000000000000",
+    "area_m2": 1.7999999999999998,
+    "azimuth_deg": 195.0,
+    "orientation": "S",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN120000000000000000000",
+    "name": "Window S2",
+    "type": "window",
+    "host_wall": "WALL0010000000000000000",
+    "area_m2": 1.7999999999999998,
+    "azimuth_deg": 195.0,
+    "orientation": "S",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN210000000000000000000",
+    "name": "Window E1",
+    "type": "window",
+    "host_wall": "WALL0020000000000000000",
+    "area_m2": 1.44,
+    "azimuth_deg": 105.0,
+    "orientation": "E",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN310000000000000000000",
+    "name": "Window N1",
+    "type": "window",
+    "host_wall": "WALL0030000000000000000",
+    "area_m2": 1.08,
+    "azimuth_deg": 15.0,
+    "orientation": "N",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   },
+   {
+    "id": "WIN410000000000000000000",
+    "name": "Window W1",
+    "type": "window",
+    "host_wall": "WALL0040000000000000000",
+    "area_m2": 1.44,
+    "azimuth_deg": 285.0,
+    "orientation": "W",
+    "u": 5.8,
+    "shgc": 0.7,
+    "esf": 1.0,
+    "data_status": "from_model"
+   }
+  ],
+  "warnings": [],
+  "unmapped_walls": [],
+  "retv_as_modelled": {
+   "retv": 12.86329003792672,
+   "retv_rounded": 13,
+   "limit": 15,
+   "a_env_m2": 108.0,
+   "opaque_part": 9.157260554593389,
+   "opening_conduction_part": 0.5288461266666666,
+   "opening_solar_part": 3.177183356666666,
+   "compliant_at_limit": true
+  },
+  "retv_if_all_walls_were": {
+   "BRICK": {
+    "retv": 14.233899289148132,
+    "retv_rounded": 14,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 10.5278698058148,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "AAC": {
+    "retv": 7.279778378558264,
+    "retv_rounded": 7,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 3.573748895224932,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "CSEB": {
+    "retv": 15.385550031471976,
+    "retv_rounded": 15,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 11.679520548138644,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "FAB": {
+    "retv": 13.47555259866036,
+    "retv_rounded": 13,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 9.769523115327027,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "PCB": {
+    "retv": 12.569185918962589,
+    "retv_rounded": 13,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 8.863156435629255,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "SAND": {
+    "retv": 6.176362865891518,
+    "retv_rounded": 6,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 2.470333382558185,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "CLC": {
+    "retv": 7.345004517234951,
+    "retv_rounded": 7,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 3.6389750339016183,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "BRKCOIR": {
+    "retv": 7.913629539078249,
+    "retv_rounded": 8,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 4.207600055744917,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
+   "SAND_CLC": {
+    "retv": 5.416541300686845,
+    "retv_rounded": 5,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 1.710511817353513,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   }
+  },
+  "note": "RETV is a whole-envelope code check (ENS 2024 Sec. 9.5). 'retv_if_all_walls_were' swaps every external wall for each candidate to show the effect of the wall alone; windows, shading (ESF) and opaque doors are not optimised. Not a compliance determination."
+ }
+}
