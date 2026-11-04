@@ -17,3 +17,7 @@ How it runs:
 * The optional local backend (IfcOpenShell and an Ollama model) is not part of this hosted version. The site shows "Browser only" when the backend isn't present.
 
 The site gives decision support only. It does not determine code compliance, structural adequacy, fire performance or moisture behaviour.
+
+## Sample model credit
+`data/models/duplex.ifc` is the Duplex Apartment architectural model: BSI (2020) "Duplex Apartment Test Files," buildingSMART International,
+https://github.com/buildingsmart-community/Community-Sample-Test-Files, licensed CC BY 4.0. It is used unchanged; the site only relocates it to the chosen site for analysis.

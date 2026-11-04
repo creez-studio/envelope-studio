@@ -61,7 +61,8 @@ export function facadeIrradiance(lat, ghiKwh, { albedo = 0.2, extra = {} } = {})
     const a = 0.409 + 0.5016 * Math.sin(wsr - Math.PI / 3), b = 0.6609 - 0.4767 * Math.sin(wsr - Math.PI / 3);
     const den = Math.sin(wsr) - wsr * Math.cos(wsr);
     const hourly = Object.fromEntries(DIRS.map(([o]) => [o, new Array(24).fill(0)]));
-    const horiz = new Array(24).fill(0);
+    const horiz = new Array(24).fill(0), sunVec = new Array(24).fill(null);
+    const beam = Object.fromEntries(DIRS.map(([o]) => [o, new Array(24).fill(0)]));
     let sumRt = 0;
     for (let h = 0; h < 24; h++) {
       const w = 15 * (h + 0.5 - 12), wr = w * D2R;
@@ -71,16 +72,17 @@ export function facadeIrradiance(lat, ghiKwh, { albedo = 0.2, extra = {} } = {})
       sumRt += rt;
       const I = rt * H, Id = Math.min(I, rd * Hd), Ib = Math.max(0, I - Id);                           // MJ/m2 in this hour
       const s = sunFromHourAngle(lat, dec, w);
-      horiz[h] = I * 1e6 / 3600;
+      horiz[h] = I * 1e6 / 3600; sunVec[h] = { east: s.east, north: s.north, up: s.up };
       for (const [o, g] of DIRS) {
         const cosT = s.east * Math.sin(g * D2R) + s.north * Math.cos(g * D2R);
         const Rb = s.up > 0.02 ? Math.max(0, cosT) / s.up : 0;
         const It = Ib * Rb + Id * 0.5 + I * albedo * 0.5;                                              // vertical: (1+cos90)/2 = (1-cos90)/2 = 0.5
         hourly[o][h] = It * 1e6 / 3600;                                                                // W/m2 averaged over the hour
+        beam[o][h] = Ib * Rb * 1e6 / 3600;                                                             // direct part (shadeable)
       }
     }
     const daily = Object.fromEntries(DIRS.map(([o]) => [o, hourly[o].reduce((x, y) => x + y, 0) / 1000]));   // kWh/m2/day
-    out.push({ month: MONTHS[m], n, Kt, diffuseFraction: fd, H0, sumRt, daily, hourly, horizontalHourly: horiz });
+    out.push({ month: MONTHS[m], n, Kt, diffuseFraction: fd, H0, sumRt, daily, hourly, beam, sunVec, horizontalHourly: horiz });
   }
   return out;
 }

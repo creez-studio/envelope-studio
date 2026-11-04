@@ -101,6 +101,7 @@ export function retv(db, opaque, openings) {
 }
 export function retvSubstitution(db, derived, project) {
   const out = {};
+  if (project.walls.reduce((t, w) => t + w.area_m2, 0) + (project.openings ?? []).reduce((t, o) => t + o.area_m2, 0) <= 0) return out;
   for (const c of db.candidates) {
     const u = derived[c.id]?.u_value; if (!u) continue;
     out[c.id] = retv(db, project.walls.map(w => ({ area_m2: w.area_m2, u: u.value, orientation: w.orientation })), project.openings ?? []);

@@ -4,7 +4,8 @@ import * as E from "./engine.js";
 import * as X from "./explain.js";
 import * as B from "./bim.js";
 import * as C from "./charts.js";
-import { ModelViewer, RAMP_STOPS, uColor as uColorOf } from "./viewer.js";
+import { RAMP_STOPS, uColor as uColorOf } from "./viewer.js";
+import * as GE from "./geom.js";
 import * as SOL from "./solar.js";
 import * as ST from "./studio.js";
 
@@ -40,7 +41,7 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch
 S.choices ||= {}; S.whMode ||= "now"; S.absorb ??= 0.6; S.studio ||= "AAC"; S.applyAll ??= false; S.sunMonth ??= new Date().getMonth(); S.sunHour ??= 10; S.sunNow ??= false; S.facade ||= "W";
 if (!db0.candidates.some(c => c.id === S.studio)) S.studio = "AAC";
 refreshData();
-let ifcBytes = null, sampleProject = D.sample_project, viewer = null, lastRes = null, lastProject = null, BACKEND = null;
+let ifcBytes = null, sampleProject = D.sample_project, lastRes = null, lastProject = null, BACKEND = null;
 
 // ------------------------------------------------------------ theme
 const applyTheme = t => { if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; };
@@ -50,7 +51,7 @@ $("theme").onclick = () => {
   const t = dark ? "light" : "dark"; applyTheme(t); try { localStorage.setItem(KEY + ".theme", t); } catch {}
 };
 
-$("banner").innerHTML = "Research demonstrator. Only cited values are used and nothing is imputed. Carbon data exists for three materials, cost only for masonry-unit prices from secondary listings, and service life, availability and maintenance are not yet collected, so every score is <b>partial</b>.";
+$("banner").title = "Only cited values are used and nothing is imputed. Carbon data exists for three materials, cost only for masonry-unit prices from secondary listings, and service life, availability and maintenance are not yet collected, so every score is partial.";
 $("ramp").innerHTML = RAMP_STOPS.map(c => `<i style="background:${c}"></i>`).join("");
 C.bindTooltips(document.body, $("tooltip"));
 
@@ -67,55 +68,79 @@ function nearestCity(lat, lon) {
   return { key: best, km: bd * 111 };
 }
 
-// ------------------------------------------------------------ 2 model
+// ------------------------------------------------------------ 2 model (3D workspace)
+const MODELS = { duplex: "data/models/duplex.ifc", sample: "data/sample_house.ifc" };
+const MESH_EXT = /\.(glb|gltf|obj|stl|fbx)$/i;
+const UNIT_SCALE = { m: 1, cm: 0.01, mm: 0.001, in: 0.0254, ft: 0.3048 };
 const srcBtns = [...$("m-src").querySelectorAll("button")];
 srcBtns.forEach(b => b.onclick = () => { S.src = b.dataset.v; save(); renderModelSide(); loadModel(); });
-function currentProject() {
+S.context ||= []; S.bRot ??= 0; S.bOff ||= { x: 0, z: 0 }; S.winDefaults ??= true; S.units ||= "m"; S.waste ??= 5;
+if (!["duplex", "sample", "ifc", "manual"].includes(S.src)) S.src = "duplex";
+let duplexProject = null, geoProject = null, facets = [], shade = null, ws = null, meshFile = null, meshInfo = null, selInfo = null, shadeJob = 0;
+const inIndia = p => p && p.lat != null && p.lat > 6 && p.lat < 37 && p.lon > 68 && p.lon < 98;
+function baseProject() {
   if (S.src === "manual") return B.manualProject(db, S.manual);
-  if (S.src === "ifc" && S.ifcProject) return S.ifcProject;
+  if (S.src === "ifc" && S.ifcProject && !meshFile) return S.ifcProject;
+  if (S.src === "ifc" && meshFile) return { site: { lat: null, lon: null }, true_north_ccw_deg: 0, walls: [], openings: [], warnings: [], reader: "3D mesh (" + meshFile.name + ")" };
+  if (S.src === "duplex" && duplexProject) return duplexProject;
   return sampleProject;
 }
+function currentProject() { return geoProject || baseProject(); }
+async function ensureDuplex() {
+  if (duplexProject || S.src !== "duplex") return;
+  const buf = await (await fetch(MODELS.duplex)).arrayBuffer();
+  if (BACKEND) { try { const r = await fetch("api/ifc", { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: buf }); if (r.ok) duplexProject = await r.json(); } catch { /* fall back */ } }
+  duplexProject ||= B.analyse(new TextDecoder().decode(buf), db, derived);
+  duplexProject.warnings = (duplexProject.warnings || []).filter(w => !/latitude|TrueNorth/i.test(w));
+  duplexProject.bytes = buf;
+}
+const SRC_TXT = { duplex: "Duplex residence (Revit)", sample: "Test house", ifc: "Upload", manual: "Facade areas" };
 function renderModelSide() {
   srcBtns.forEach(b => b.classList.toggle("on", b.dataset.v === S.src));
-  const el = $("m-side");
-  if (S.src === "sample") {
-    el.innerHTML = `<h3>Sample house</h3><p class="sub">Hand-authored IFC4 test model: 10 × 8 m, one storey, brick walls on three sides and AAC on the north, five single-glazed windows, true north rotated 15°. Not exported from a BIM tool.</p><p><a href="data/sample_house.ifc" download>Download sample_house.ifc</a></p>` + modelFacts(sampleProject);
+  $("m-src-s").textContent = SRC_TXT[S.src];
+  const el = $("m-side"), p = baseProject();
+  const winBox = `<label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="win-def" ${S.winDefaults ? "checked" : ""}> Assume U 5.8 W/m²K and SHGC 0.7 (single clear glass) for windows without thermal data</label>`;
+  if (S.src === "duplex") {
+    el.innerHTML = `<p class="small" style="margin:0 0 8px">Two-storey duplex apartment exported from Autodesk Revit (IFC2x3): walls, roof, slabs, ${p.openings?.length ?? "–"} windows and doors. Relocated to your site; its original site and north are ignored.</p>
+      <p class="small mut" style="margin:0 0 8px">Source: BSI (2020) "Duplex Apartment Test Files", buildingSMART International, CC BY 4.0. Unchanged except for relocation.</p>` + winBox + modelFacts(p);
+  } else if (S.src === "sample") {
+    el.innerHTML = `<p class="small" style="margin:0 0 8px">Hand-authored IFC4 test box: 10 × 8 m, brick on three sides, AAC on the north, five windows.</p><a class="small" href="data/sample_house.ifc" download>Download sample_house.ifc</a>` + modelFacts(p);
   } else if (S.src === "ifc") {
-    el.innerHTML = `<h3>Upload IFC</h3><p class="sub">Walls need material layer sets and a NetSideArea quantity; windows need ThermalTransmittance and SolarHeatGainTransmittance for RETV.</p>
-      <label class="drop" id="drop"><input type="file" id="ifc-file" accept=".ifc,.rvt,.rfa" hidden><b>Drop an IFC or Revit file here</b><br><span class="small">.ifc is read directly · .rvt needs an IFC export (steps below)</span></label>` + IFC_HELP +
-      (S.ifcProject ? `<p class="small" style="margin-top:10px"><b>${esc(S.ifcName || "model.ifc")}</b></p>` + modelFacts(S.ifcProject) : "");
+    el.innerHTML = `<label class="drop" id="drop"><input type="file" id="ifc-file" accept=".ifc,.rvt,.rfa,.glb,.gltf,.obj,.stl,.fbx" hidden><b>Drop a model here</b><br><span class="small">IFC (best: walls, layers, windows) · glTF/GLB · OBJ · STL · FBX · Revit .rvt shows export steps</span></label>
+      <label class="f" style="margin:10px 0 0"><span>Units of mesh files (OBJ, STL, FBX, glTF)</span><select id="mesh-units">${Object.keys(UNIT_SCALE).map(u => `<option ${u === S.units ? "selected" : ""}>${u}</option>`).join("")}</select></label>` +
+      (meshInfo ? `<p class="small" style="margin:8px 0 0"><b>${esc(meshFile.name)}</b> · ${meshInfo.meshes} meshes · ${f(meshInfo.size.x, 1)} × ${f(meshInfo.size.z, 1)} m plan, ${f(meshInfo.size.y, 1)} m high. If these look wrong, change the units.</p>` : "") +
+      (S.ifcProject && !meshFile ? `<p class="small" style="margin:8px 0 0"><b>${esc(S.ifcName || "model.ifc")}</b></p>` + winBox + modelFacts(p) : "") + IFC_HELP;
     const inp = $("ifc-file"), drop = $("drop");
     inp.onchange = () => inp.files[0] && readIfc(inp.files[0]);
     drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
     drop.ondragleave = () => drop.classList.remove("over");
     drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); if (e.dataTransfer.files[0]) readIfc(e.dataTransfer.files[0]); };
+    $("mesh-units").onchange = e => { S.units = e.target.value; save(); if (meshFile) loadModel(); };
   } else {
     const m = S.manual;
-    el.innerHTML = `<h3>Facade areas</h3><p class="sub">Gross wall area per orientation, including windows.</p>` +
-      ["N", "E", "S", "W", "NE", "SE", "SW", "NW"].map(o => `<label class="f" style="display:inline-block;width:23%;margin-right:2%"><span>${o} (m²)</span><input type="number" min="0" step="0.5" data-o="${o}" value="${m.areas[o] ?? ""}"></label>`).join("") +
-      `<div class="row"><label class="f" style="flex:1"><span>Window-to-wall ratio</span><input type="number" id="mm-wwr" min="0" max="0.9" step="0.01" value="${m.wwr}"></label>
-       <label class="f" style="flex:1"><span>Window U</span><input type="number" id="mm-u" step="0.1" value="${m.winU}"></label>
-       <label class="f" style="flex:1"><span>Window SHGC</span><input type="number" id="mm-g" step="0.05" value="${m.winShgc}"></label></div>
-       <p class="small mut">Defaults (U 5.8, SHGC 0.7) are typical of single clear glazing and are your assumption; replace them with product data.</p>`;
+    el.innerHTML = `<p class="small mut" style="margin:0 0 8px">Gross wall area per orientation, including windows.</p><div class="grid g4" style="gap:8px">` +
+      ["N", "E", "S", "W", "NE", "SE", "SW", "NW"].map(o => `<label class="f" style="margin:0"><span>${o} m²</span><input type="number" min="0" step="0.5" data-o="${o}" value="${m.areas[o] ?? ""}"></label>`).join("") +
+      `</div><div class="grid g3" style="gap:8px;margin-top:8px"><label class="f" style="margin:0"><span>WWR</span><input type="number" id="mm-wwr" min="0" max="0.9" step="0.01" value="${m.wwr}"></label>
+       <label class="f" style="margin:0"><span>Window U</span><input type="number" id="mm-u" step="0.1" value="${m.winU}"></label><label class="f" style="margin:0"><span>SHGC</span><input type="number" id="mm-g" step="0.05" value="${m.winShgc}"></label></div>`;
     el.querySelectorAll("input[data-o]").forEach(i => i.oninput = () => { const v = i.value === "" ? undefined : +i.value; if (v === undefined) delete m.areas[i.dataset.o]; else m.areas[i.dataset.o] = v; save(); loadModel(); });
     $("mm-wwr").oninput = e => { m.wwr = +e.target.value; save(); loadModel(); };
     $("mm-u").oninput = e => { m.winU = +e.target.value; save(); loadModel(); };
     $("mm-g").oninput = e => { m.winShgc = +e.target.value; save(); loadModel(); };
   }
+  const wd = $("win-def"); if (wd) wd.onchange = e => { S.winDefaults = e.target.checked; save(); rebuildGeometry(false); };
 }
 const IFC_HELP = `<details class="ifc-help"><summary><b>Exporting from Revit, ArchiCAD or SketchUp</b></summary><ol style="margin:6px 0 0;padding-left:18px">
-  <li><b>Revit:</b> File → Export → IFC. Choose IFC4 Reference View (or IFC2x3 Coordination View 2.0), tick <i>Export base quantities</i> and <i>Export IFC common property sets</i>, set the project location and true north in Manage → Location, then export.</li>
-  <li><b>ArchiCAD:</b> File → Save as → IFC, translator "General Translator", with property sets and quantities.</li>
-  <li><b>SketchUp / others:</b> use an IFC exporter; walls need material layers named e.g. "Burnt clay brick", "AAC block", "Cement plaster".</li>
-  <li>Windows need <i>ThermalTransmittance</i> and <i>SolarHeatGainTransmittance</i> (Pset_WindowCommon) for the RETV.</li></ol>
-  <p class="small mut" style="margin:6px 0 0">Revit's native .rvt is a closed Autodesk format: no browser or open-source tool (including IfcOpenShell) can read it, so the IFC export is required.</p></details>`;
+  <li><b>Revit:</b> File → Export → IFC, IFC4 Reference View (or IFC2x3 Coordination View 2.0), tick <i>Export base quantities</i>; set Manage → Location and true north first.</li>
+  <li><b>ArchiCAD:</b> File → Save as → IFC, "General Translator", with property sets and quantities.</li>
+  <li><b>SketchUp, Rhino, Blender:</b> export glTF/GLB or OBJ in metres; walls are found from the geometry (no materials).</li>
+  <li>Windows need <i>ThermalTransmittance</i> and <i>SolarHeatGainTransmittance</i> for the RETV.</li></ol>
+  <p class="small mut" style="margin:6px 0 0">Revit's native .rvt is a closed Autodesk format that no browser or open-source tool can read, so export IFC.</p></details>`;
 function modelFacts(p) {
   const ext = p.walls.filter(w => w.external);
-  return `<dl class="kv"><dt>Site</dt><dd>${p.site.lat != null ? f(p.site.lat, 3) + " N, " + f(p.site.lon, 3) + " E" : "not in model"}</dd>
-    <dt>Read by</dt><dd>${esc(p.reader || "built-in text parser (browser)")}</dd><dt>True north</dt><dd>${f(p.true_north_ccw_deg, 1)}° from project +Y</dd><dt>External walls</dt><dd>${ext.length} · ${f(ext.reduce((s, w) => s + (w.area_m2 || 0), 0), 1)} m² net</dd>
-    <dt>Openings</dt><dd>${p.openings.length} · ${f(p.openings.reduce((s, o) => s + o.area_m2, 0), 1)} m²</dd>
-    <dt>RETV as modelled</dt><dd>${p.retv_as_modelled ? f(p.retv_as_modelled.retv, 2) + " W/m²" : "not available"}</dd></dl>` +
-    (p.warnings || []).map(w => `<div class="note">${esc(w)}</div>`).join("");
+  return `<dl class="kv" style="margin-top:10px"><dt>Read by</dt><dd>${esc(p.reader || "built-in parser (browser)")}</dd>
+    <dt>External walls</dt><dd>${ext.length}${ext.some(w => w.area_m2) ? " · " + f(ext.reduce((s, w) => s + (w.area_m2 || 0), 0), 1) + " m²" : ""}</dd>
+    <dt>Openings</dt><dd>${p.openings.length} · ${f(p.openings.reduce((s, o) => s + o.area_m2, 0), 1)} m²</dd></dl>` +
+    (p.warnings || []).slice(0, 3).map(w => `<div class="note">${esc(w.length > 220 ? w.slice(0, 220) + "…" : w)}</div>`).join("");
 }
 // Revit files: read only what is stored openly (build string, worksharing flag, embedded preview); geometry needs an IFC export.
 async function readRevit(file) {
@@ -124,59 +149,186 @@ async function readRevit(file) {
   const txt = new TextDecoder("utf-16le").decode(b.subarray(0, Math.min(b.length, 2_000_000)));
   const ver = (txt.match(/Autodesk Revit[^\u0000\r\n]{0,40}?\d{4}/) || [])[0] || null;
   const build = (txt.match(/Build: ?(\d{8}_\d{4})/) || [])[1] || null;
-  const ws = (txt.match(/Worksharing: ?([^\u0000\r\n]{0,20})/) || [])[1] || null;
+  const wsh = (txt.match(/Worksharing: ?([^\u0000\r\n]{0,20})/) || [])[1] || null;
   let img = null;
-  const sig = [0x89, 0x50, 0x4e, 0x47];
-  for (let i = 0; i < Math.min(b.length, 4_000_000) - 8; i++) if (b[i] === sig[0] && b[i + 1] === sig[1] && b[i + 2] === sig[2] && b[i + 3] === sig[3]) {
+  for (let i = 0; i < Math.min(b.length, 4_000_000) - 8; i++) if (b[i] === 0x89 && b[i + 1] === 0x50 && b[i + 2] === 0x4e && b[i + 3] === 0x47) {
     for (let j = i; j < Math.min(b.length, i + 2_000_000); j++) if (b[j] === 0x49 && b[j + 1] === 0x45 && b[j + 2] === 0x4e && b[j + 3] === 0x44) { img = URL.createObjectURL(new Blob([b.subarray(i, j + 8)], { type: "image/png" })); break; }
     break;
   }
-  S.src = "ifc"; srcBtns.forEach(x => x.classList.toggle("on", x.dataset.v === "ifc"));
   $("m-side").querySelector(".revit-card")?.remove();
   const card = document.createElement("div"); card.className = "ifc-help revit-card";
   card.innerHTML = `<b>${esc(file.name)}</b> (${(file.size / 1048576).toFixed(1)} MB)${img ? `<img src="${img}" alt="Revit preview" style="display:block;width:128px;height:128px;margin:8px 0;border:1px solid var(--line);border-radius:8px;background:#fff;image-rendering:pixelated">` : ""}
-    <dl class="kv"><dt>Format</dt><dd>${isOle ? "Revit project (OLE container)" : "not a recognised Revit file"}</dd><dt>Saved with</dt><dd>${esc(ver || "unknown")}${build ? ` (build ${esc(build)})` : ""}</dd><dt>Worksharing</dt><dd>${esc(ws || "unknown")}</dd></dl>
-    <p style="margin:8px 0 0">Walls, layers and windows inside a .rvt can only be read by Revit itself. Open it in Revit ${ver && /20\d\d/.test(ver) ? (ver.match(/20\d\d/)[0]) + " or newer" : ""} (Windows; a college lab PC works), set <i>Manage → Location</i> and the true north, then <i>File → Export → IFC</i> (IFC4 Reference View, tick <i>Export base quantities</i>), and drop the .ifc here. Everything below then fills in automatically.</p>`;
-  $("m-side").prepend(card);
-  const d = document.querySelector(".ifc-help:not(.revit-card)"); if (d) d.open = true;
-  $("v-status").textContent = `Read the Revit file's header only. Export it as IFC to analyse its walls.`;
+    <dl class="kv"><dt>Format</dt><dd>${isOle ? "Revit project" : "not a recognised Revit file"}</dd><dt>Saved with</dt><dd>${esc(ver || "unknown")}${build ? ` (build ${esc(build)})` : ""}</dd><dt>Worksharing</dt><dd>${esc(wsh || "unknown")}</dd></dl>
+    <p style="margin:8px 0 0">Open it in Revit ${ver && /20\d\d/.test(ver) ? ver.match(/20\d\d/)[0] + " or newer" : ""} (Windows), then File → Export → IFC and drop the .ifc here. Meanwhile the Duplex residence shows how a real Revit model is analysed.</p>`;
+  $("m-side").prepend(card); document.querySelector("#m-side details.ifc-help")?.setAttribute("open", "");
+  $("v-status").textContent = "Read the Revit file's header only; export IFC to analyse its walls.";
 }
 async function readIfc(file) {
   if (/\.(rvt|rfa|rte)$/i.test(file.name)) { await readRevit(file); return; }
+  if (MESH_EXT.test(file.name)) { meshFile = file; S.ifcProject = null; renderModelSide(); loadModel(); return; }
   $("v-status").textContent = "Reading " + file.name + "…";
   try {
     const buf = await file.arrayBuffer();
     let p;
     if (BACKEND) {
-      $("v-status").textContent = "Reading " + file.name + " with IfcOpenShell on the local backend…";
       const r = await fetch("api/ifc", { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: buf });
       if (!r.ok) throw new Error("backend: " + (await r.text()).slice(0, 200));
       p = await r.json();
     } else p = B.analyse(new TextDecoder().decode(buf), db, derived);
-    S.ifcProject = p; S.ifcName = file.name; ifcBytes = buf;
-    if (p.site.lat != null) { S.lat = +p.site.lat.toFixed(4); S.lon = +p.site.lon.toFixed(4); $("p-lat").value = S.lat; $("p-lon").value = S.lon; const n = nearestCity(p.site.lat, p.site.lon); S.city = n.key; $("p-city").value = n.key; }
+    if (inIndia(p.site)) { S.lat = +p.site.lat.toFixed(4); S.lon = +p.site.lon.toFixed(4); $("p-lat").value = S.lat; $("p-lon").value = S.lon; const n = nearestCity(p.site.lat, p.site.lon); S.city = n.key; $("p-city").value = n.key; }
+    else p.warnings = (p.warnings || []).filter(w => !/latitude/i.test(w)).concat(p.site.lat != null ? ["The model's own site is outside India; it is analysed at the location set on the Site tab."] : []);
+    S.ifcProject = p; S.ifcName = file.name; ifcBytes = buf; meshFile = null; meshInfo = null;
     save(); renderModelSide(); loadModel();
   } catch (e) { $("v-status").textContent = "Could not read this IFC file: " + e.message; }
 }
+window.__envStudio = { get ws() { return ws; }, get facets() { return facets; }, get shade() { return shade; } };   // debugging hook (read-only)
+async function createWorkspace() {
+  const { Workspace } = await import("./viewer2.js");
+  const w = new Workspace($("viewer"), { onPick, onEdit });
+  await w.init();
+  return w;
+}
 async function loadModel() {
-  const p = currentProject(); lastProject = p;
-  renderWalls(p); update();
-  if (S.src === "manual") { $("viewer").innerHTML = `<div style="display:grid;place-items:center;height:100%;color:var(--muted);font-size:.9rem;padding:20px;text-align:center">No 3D model in manual mode.<br>Areas are used directly for the RETV screen.</div>`; viewer = null; $("v-status").textContent = ""; return; }
+  geoProject = null; facets = []; shade = null; selInfo = null;
+  await ensureDuplex();
+  const base = baseProject(); lastProject = base;
+  renderModelSide(); renderWalls(base); update();
+  if (S.src === "manual") { ws?.clearBuilding(); ws?.setLabels([]); $("v-status").textContent = "Manual areas: no 3D geometry."; return; }
   try {
-    if (!viewer) { $("viewer").innerHTML = `<div style="display:grid;place-items:center;height:100%;color:var(--muted)">Loading 3D viewer…</div>`; viewer = new ModelViewer($("viewer")); await viewer.init(); }
-    let bytes = S.src === "ifc" ? ifcBytes : await (await fetch("data/sample_house.ifc")).arrayBuffer();
-    if (!bytes) { viewer.schematic(p); $("v-status").textContent = "Schematic view from the saved model data (re-upload the IFC to see its geometry). Wall height assumed 3 m."; return; }
-    try { const n = await viewer.model(bytes, p); $("v-status").textContent = `Model geometry (${n} meshes, tessellated by web-ifc). Drag to orbit, scroll to zoom. Walls are coloured by U-value (grey = unmapped); the compass shows true north; the yellow sphere and shadows follow the sun study.`; }
-    catch (e) { const n = viewer.schematic(p); $("v-status").textContent = `Schematic view (${n} walls from placements and areas, height assumed 3 m) because model geometry could not be shown: ${e.message}.`; }
-    paintViewer(); sunStudy();
-  } catch (e) { $("viewer").innerHTML = `<div style="display:grid;place-items:center;height:100%;color:var(--muted);padding:20px;text-align:center">3D viewer unavailable (${esc(e.message)}). The analysis below does not depend on it.</div>`; viewer = null; }
+    if (!ws) { $("v-status").textContent = "Loading the 3D workspace…"; ws = await createWorkspace(); }
+    $("v-status").textContent = "Loading the model…";
+    if (S.src === "ifc" && meshFile) { meshInfo = await ws.loadFile(meshFile, UNIT_SCALE[S.units]); renderModelSide(); }
+    else {
+      const bytes = S.src === "ifc" ? ifcBytes : S.src === "duplex" ? duplexProject.bytes : await (await fetch(MODELS.sample)).arrayBuffer();
+      if (!bytes) ws.schematic(base); else { try { await ws.loadIFC(bytes, base); } catch (e) { ws.schematic(base); } }
+    }
+    ws.setContext(S.context); ws.setBuildingRotation(S.bRot); ws.setBuildingOffset(S.bOff.x, S.bOff.z);
+    $("ed-rot").value = S.bRot; $("ed-rotv").textContent = S.bRot + "°";
+    renderContextList(); rebuildGeometry(true);
+  } catch (e) { $("v-status").textContent = "3D view unavailable: " + e.message + ". The analysis still uses the model's wall data."; }
+}
+function buildGeoProject(base, fcs) {
+  const tn = ws?.tn ?? 0, byId = Object.fromEntries(base.walls.map(w => [w.id, w]));
+  const walls = fcs.map(fc => {
+    const az = ((fc.facet.az_p + tn) % 360 + 360) % 360, w = fc.wall || byId[fc.id] || {};
+    return { ...w, id: fc.id, name: fc.name, external: true, area_m2: fc.facet.area, area_source: "3D geometry", azimuth_deg: Math.round(az * 10) / 10,
+      orientation: E.orientationBin(az), orientation_source: "3D geometry", layers: w.layers || [], u_value: w.u_value ?? null, facet: fc.facet,
+      labelPos: [fc.facet.cx, fc.facet.height.max + 0.6, fc.facet.cz] };
+  });
+  const openings = (base.openings || []).map(o => {
+    const host = walls.find(w => w.id === o.host_wall);
+    const ori = host ? host.orientation : o.orientation;
+    return S.winDefaults ? { ...o, orientation: ori, u: o.u ?? 5.8, shgc: o.shgc ?? 0.7, data_status: o.u == null || o.shgc == null ? "assumed" : o.data_status } : { ...o, orientation: ori };
+  });
+  return { ...base, walls: walls.length ? walls : base.walls, openings, retv_as_modelled: null, from_geometry: walls.length > 0 };
+}
+let rebuildTimer = null;
+function rebuildGeometry(now = false) {
+  clearTimeout(rebuildTimer);
+  const run = () => {
+    if (!ws || S.src === "manual") { geoProject = null; update(); return; }
+    facets = ws.wallFacets();
+    geoProject = buildGeoProject(baseProject(), facets);
+    const p = geoProject, ext = p.walls.filter(w => w.u_value != null && w.area_m2);
+    if (ext.length && ext.length === p.walls.length) { const ok = p.openings.filter(o => o.u != null && o.shgc != null); p.retv_as_modelled = E.retv(db, ext.map(w => ({ area_m2: w.area_m2, u: w.u_value, orientation: w.orientation })), ok); }
+    lastProject = p; renderWalls(p); computeShading(); update(); sunStudy();
+  };
+  if (now) run(); else rebuildTimer = setTimeout(run, 250);
+}
+async function computeShading() {
+  const job = ++shadeJob; shade = null;
+  if (!ws || !facets.length) return;
+  const lat = siteLat(), F = SOL.facadeIrradiance(lat, cities[S.city].monthly.ALLSKY_SFC_SW_DWN), occ = ws.occluders();
+  const out = Object.fromEntries(facets.map(fc => [fc.id, Array.from({ length: 12 }, () => new Array(24).fill(1))]));
+  const front = Object.fromEntries(facets.map(fc => [fc.id, [0, 0]]));        // [hours with sun in front of the wall, of which lit]
+  for (let m = 0; m < 12; m++) {
+    for (let h = 0; h < 24; h++) { const v = F[m].sunVec[h]; if (!v || v.up <= 0) continue; const sw = ws.sunWorld(v);
+      for (const fc of facets) { const fr = GE.sunlitFraction(fc.facet, sw, occ, fc.id); out[fc.id][m][h] = fr;
+        if (fc.facet.nx * sw[0] + fc.facet.nz * sw[2] > 0.05) { front[fc.id][0]++; if (fr > 0.01) front[fc.id][1]++; } } }
+    $("v-status").textContent = `Ray-tracing sun and shade… ${m + 1}/12`;
+    await new Promise(r => setTimeout(r, 0));
+    if (job !== shadeJob) return;
+  }
+  // walls that never see the sun (party walls, walls inside the building) are not part of the solar envelope
+  const enclosed = facets.filter(fc => front[fc.id][0] > 0 && front[fc.id][1] / front[fc.id][0] < 0.01).map(fc => fc.id);
+  if (enclosed.length) { facets = facets.filter(fc => !enclosed.includes(fc.id)); geoProject = buildGeoProject(baseProject(), facets); lastProject = geoProject; renderWalls(geoProject); }
+  shade = out; update();
+  $("v-status").textContent = `${facets.length} sunlit walls${enclosed.length ? ` (${enclosed.length} enclosed walls skipped)` : ""} · shade from the building and ${S.context.length} context object${S.context.length === 1 ? "" : "s"} · drag to orbit, click a wall`;
+  renderWallHeat(); renderQuantities();
 }
 function renderWalls(p) {
-  $("m-walls").innerHTML = `<table><tr><th>Wall</th><th>Facing</th><th class="num">Net area (m²)</th><th>Layers → ENS Table 46</th><th class="num">U (W/m²K)</th></tr>` +
-    p.walls.map(w => `<tr><td>${esc(w.name)}${w.external ? "" : " <span class='tag'>internal</span>"}</td><td>${w.orientation} ${w.azimuth_deg != null ? `<span class="small mut">${w.azimuth_deg}° · ${esc(w.orientation_source.replace("_", " "))}</span>` : ""}</td><td class="num">${f(w.area_m2, 2)}</td>` +
-      `<td class="small">${w.layers.length ? w.layers.map(l => `${l.t_mm} mm ${esc(l.material)}${l.catalogue_ref ? "" : " <span class='tag bad'>unmapped</span>"}`).join(" + ") : "<span class='mut'>chosen per candidate</span>"}</td>` +
-      `<td class="num">${w.u_value != null ? f(w.u_value, 2) : "<span class='mut'>–</span>"}</td></tr>`).join("") + `</table>` +
-    (p.openings.length ? `<details><summary>${p.openings.length} openings</summary><table><tr><th>Opening</th><th>Facing</th><th class="num">Area (m²)</th><th class="num">U</th><th class="num">SHGC</th></tr>${p.openings.map(o => `<tr><td>${esc(o.name)}</td><td>${o.orientation}</td><td class="num">${f(o.area_m2, 2)}</td><td class="num">${o.u ?? "<span class='tag bad'>missing</span>"}</td><td class="num">${o.shgc ?? "<span class='tag bad'>missing</span>"}</td></tr>`).join("")}</table></details>` : "");
+  $("m-walls").innerHTML = `<table><tr><th>Wall</th><th>Facing</th><th class="num">Area m²</th><th>Layers → ENS Table 46</th><th class="num">U</th></tr>` +
+    p.walls.map(w => `<tr><td>${esc(w.name)}</td><td>${w.orientation}${w.azimuth_deg != null ? ` <span class="small mut">${w.azimuth_deg}° · ${esc((w.orientation_source || "").replace("_", " "))}</span>` : ""}</td><td class="num">${f(w.area_m2, 1)}</td>` +
+      `<td class="small">${w.layers?.length ? w.layers.map(l => `${l.t_mm} mm ${esc(l.material)}${l.catalogue_ref ? "" : " <span class='tag bad'>unmapped</span>"}`).join(" + ") : "<span class='mut'>material from the Materials tab</span>"}</td>` +
+      `<td class="num">${w.u_value != null ? f(w.u_value, 2) : "–"}</td></tr>`).join("") + `</table>` +
+    (p.openings.length ? `<p class="small mut">${p.openings.length} openings · ${f(p.openings.reduce((s, o) => s + o.area_m2, 0), 1)} m²${p.openings.some(o => o.data_status === "assumed") ? " · some with assumed glass properties" : ""}</p>` : "");
+}
+
+// ------------------------------------------------------------ editing: rotation, move, context
+$("ed-rot").oninput = e => { S.bRot = +e.target.value; $("ed-rotv").textContent = S.bRot + "°"; ws?.setBuildingRotation(S.bRot); save(); rebuildGeometry(); };
+$("ed-nb").onclick = () => { if (!ws) return; ws.addContext({ type: "box", w: 12, d: 10, h: 9, x: 0, z: 20, rot: 0 }); syncContext(); };
+$("ed-tree").onclick = () => { if (!ws) return; ws.addContext({ type: "tree", h: 9, r: 3, x: 14, z: 6 }); syncContext(); };
+$("ed-reset").onclick = () => { S.bRot = 0; S.bOff = { x: 0, z: 0 }; S.context = []; save(); ws?.setContext([]); ws?.setBuildingRotation(0); ws?.setBuildingOffset(0, 0); $("ed-rot").value = 0; $("ed-rotv").textContent = "0°"; renderContextList(); rebuildGeometry(); };
+function syncContext() { const st = ws.state(); S.context = st.context; save(); renderContextList(); rebuildGeometry(); }
+function onEdit(st) { S.bRot = st.rot; S.bOff = { x: st.x, z: st.z }; S.context = st.context; save(); $("ed-rot").value = S.bRot; $("ed-rotv").textContent = Math.round(S.bRot) + "°"; renderContextList(); rebuildGeometry(); }
+function renderContextList() {
+  $("ed-list").innerHTML = S.context.map(c => `<div><span>${c.type === "tree" ? "🌳 Tree" : "▦ Neighbour"} · ${c.type === "tree" ? `${c.h} m, crown ${c.r} m` : `${c.w}×${c.d}×${c.h} m`}</span><span><button class="btn sm" data-sel="${c.id}">Edit</button> <button class="btn sm" data-del="${c.id}">✕</button></span></div>`).join("") || `<p class="small mut" style="margin:0">No neighbours or trees yet. Add them to see their shade on each wall.</p>`;
+  $("ed-list").querySelectorAll("[data-del]").forEach(b => b.onclick = () => { ws.removeContext(b.dataset.del); $("ed-props").innerHTML = ""; syncContext(); });
+  $("ed-list").querySelectorAll("[data-sel]").forEach(b => b.onclick = () => { const o = ws.context.children.find(c => c.userData.ctxId === b.dataset.sel); if (o) ws.select(o.children?.[0] || o); });
+}
+function ctxProps(item) {
+  const fields = item.type === "tree" ? [["h", "Height m"], ["r", "Crown radius m"]] : [["w", "Width m"], ["d", "Depth m"], ["h", "Height m"]];
+  $("ed-props").innerHTML = `<div class="grid ${item.type === "tree" ? "g2" : "g3"}" style="gap:8px">${fields.map(([k, l]) => `<label class="f" style="margin:0"><span>${l}</span><input type="number" min="0.5" step="0.5" data-k="${k}" value="${item[k]}"></label>`).join("")}</div><p class="small mut" style="margin:6px 0 0">Drag it with Move / Rotate in the toolbar.</p>`;
+  $("ed-props").querySelectorAll("input").forEach(i => i.onchange = () => {
+    const st = ws.state(), it = st.context.find(c => c.id === item.id); if (!it) return;
+    it[i.dataset.k] = Math.max(0.5, +i.value); ws.setContext(st.context); S.context = st.context; save(); renderContextList(); rebuildGeometry();
+  });
+}
+let vpMode = "select";
+$("vp-mode").querySelectorAll("button").forEach(b => b.onclick = () => {
+  vpMode = b.dataset.mode; $("vp-mode").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  if (!ws) return;
+  if (vpMode === "select") ws.tc.detach();
+  else { ws.setMode(vpMode === "rotate" ? "rotate" : "move"); if (!ws.tc.object) ws.editBuilding(true); }
+});
+$("vp-views").querySelectorAll("button").forEach(b => b.onclick = () => ws?.view(b.dataset.view));
+$("vp-grid").onclick = e => { e.target.classList.toggle("on"); ws?.setGrid(e.target.classList.contains("on")); };
+$("vp-ao").onclick = e => { e.target.classList.toggle("on"); ws?.setAO(e.target.classList.contains("on")); };
+$("vp-labels").onclick = e => { e.target.classList.toggle("on"); ws && (ws.labelLayer.style.display = e.target.classList.contains("on") ? "" : "none"); };
+function onPick(info) {
+  selInfo = info;
+  if (info?.kind === "context" && info.item) { ctxProps(info.item); if (vpMode !== "select") ws.setMode(vpMode === "rotate" ? "rotate" : "move"); }
+  renderSelection();
+  if (info) $("sel-card").open = true;
+}
+function renderSelection() {
+  const info = selInfo;
+  if (!info) { $("sel-s").textContent = "click a wall or object"; $("sel-out").innerHTML = `<span class="mut">Click any wall, neighbour or tree in the 3D view.</span>`; return; }
+  if (info.kind === "context") { $("sel-s").textContent = info.item.type === "tree" ? "tree" : "neighbour"; $("sel-out").innerHTML = `<p style="margin:0">${info.item.type === "tree" ? "Tree crown lets about 25% of direct sun through." : "Opaque neighbouring block."} Edit its size in <i>Edit building &amp; context</i>.</p>`; return; }
+  const id = info.wall?.id ?? (info.eid != null ? "eid-" + info.eid : null), w = currentProject().walls.find(x => x.id === id);
+  $("sel-s").textContent = info.kind || "element";
+  if (!w) { $("sel-out").innerHTML = `<p style="margin:0">${esc(info.name || info.kind || "Element")}${info.eid != null ? ` <span class="mut">#${info.eid}</span>` : ""}. Not an external wall, so no solar analysis.</p>`; return; }
+  const r = heatRows().find(x => x.wall.id === id);
+  $("sel-out").innerHTML = `<p style="margin:0 0 6px"><b>${esc(w.name)}</b></p><dl class="kv"><dt>Faces</dt><dd>${w.orientation} · ${w.azimuth_deg}°</dd><dt>Net area</dt><dd>${f(w.area_m2, 1)} m² (from 3D geometry)</dd>
+    <dt>Layers</dt><dd>${w.layers?.length ? w.layers.map(l => `${l.t_mm} mm ${esc(l.material)}`).join(" + ") : "–"}</dd><dt>U-value</dt><dd>${w.u_value != null ? f(w.u_value) + " W/m²K" : "unmapped layers; using the Materials tab choice"}</dd>
+    ${r ? `<dt>Sun now</dt><dd>${Math.round(r.I)} W/m²${r.sunlit != null ? ` · ${Math.round(r.sunlit * 100)}% sunlit` : ""}</dd><dt>This month</dt><dd>${f(r.day, 2)} kWh/m² per day</dd><dt>Year</dt><dd>${Math.round(r.annual_kwh_m2)} kWh/m² · ${Math.round(r.annual_kwh).toLocaleString("en-IN")} kWh on the wall</dd><dt>Shade, year</dt><dd>${Math.round(r.shadeLoss * 100)}% of direct sun blocked</dd>` : ""}</dl>`;
+}
+
+// ------------------------------------------------------------ quantities: wall areas, block counts, cost
+function renderQuantities() {
+  const p = currentProject(), walls = p.walls.filter(w => w.external && w.area_m2);
+  if (!walls.length) { $("q-out").innerHTML = `<p class="small mut" style="margin:0">Needs wall areas.</p>`; $("q-s").textContent = ""; return; }
+  const area = walls.reduce((s, w) => s + w.area_m2, 0), open = p.openings.reduce((s, o) => s + o.area_m2, 0);
+  const byO = {}; for (const w of walls) byO[w.orientation] = (byO[w.orientation] || 0) + w.area_m2;
+  const v = ST.activeVariant(db0, D.market, S.choices, S.studio), pcs = v ? ST.piecesPerM2(v) : null, waste = 1 + (S.waste || 0) / 100;
+  const blocks = pcs ? Math.ceil(area * pcs * waste) : null, cost = pcs && v.price_inr != null ? blocks * v.price_inr : null;
+  $("q-s").textContent = f(area, 0) + " m²";
+  $("q-out").innerHTML = `<div class="mini"><div><div class="k">Opaque wall</div><div class="v">${f(area, 1)} m²</div></div><div><div class="k">Openings</div><div class="v">${f(open, 1)} m²</div></div>
+    <div><div class="k">${esc(SHORT(S.studio))} units</div><div class="v">${blocks != null ? blocks.toLocaleString("en-IN") : "–"}</div></div><div><div class="k">Unit cost</div><div class="v">${cost != null ? inr(cost) : "–"}</div></div></div>
+    <p class="small mut" style="margin:8px 0">${v && v.l_mm ? `${esc(v.label || "")}: ${f(v.l_mm, 0)} × ${f(v.h_mm, 0)} mm face${v.joint_mm ? ` + ${v.joint_mm} mm joints` : ""}${v.wythes > 1 ? `, ${v.wythes} wythes` : ""} → ${f(pcs, 1)} per m²` : "Choose a material with unit dimensions on the Materials tab."} · wastage <input type="number" id="q-waste" value="${S.waste}" min="0" max="25" step="1" style="width:56px;padding:3px 6px"> %</p>
+    <table><tr><th>Facing</th><th class="num">Area m²</th><th class="num">Units</th></tr>${Object.entries(byO).sort((a, b) => b[1] - a[1]).map(([o, a]) => `<tr><td>${o}</td><td class="num">${f(a, 1)}</td><td class="num">${pcs ? Math.ceil(a * pcs * waste).toLocaleString("en-IN") : "–"}</td></tr>`).join("")}</table>
+    <p class="small mut" style="margin:8px 0 0">Areas are measured on the 3D geometry (outer face, openings excluded). Units only: no mortar, plaster, lintels or labour.</p>`;
+  $("q-waste").onchange = e => { S.waste = Math.max(0, +e.target.value); save(); renderQuantities(); };
 }
 
 // ------------------------------------------------------------ 3 goals
@@ -258,7 +410,7 @@ function update() {
         `<td class="num">${rv ? f(rv.retv, 1) + (rv.compliant_at_limit ? "" : " <span class='tag bad'>over</span>") : "–"}</td><td class="num">${i2 ? f(i2.decrement_factor) : "–"}</td></tr>`;
     }).join("") + `</table>` + res.warnings.map(w => `<div class="note">${esc(w)}</div>`).join("");
 
-  renderClimate(); renderEvidence(res); renderStudio(res, sub, area); renderSun(); paintViewer();
+  renderClimate(); renderEvidence(res); renderStudio(res, sub, area); renderSun(); paintViewer(); renderQuantities(); renderOverview(res, sub, area, cur);
   explain(false);
 }
 
@@ -297,7 +449,7 @@ $("e-src").innerHTML = `<h3 style="margin-top:16px">Source register</h3><table><
 // ------------------------------------------------------------ explanation (AI layer)
 let explainTimer = null;
 function factsFor() {
-  const p = lastProject, cur = p.retv_as_modelled;
+  const p = lastProject || currentProject(), cur = p.retv_as_modelled;
   return X.buildFacts(lastRes, db, derived, D.sources, { indicators: ind, climate: D.climate_summary[S.city], retvSub: S.type === "residential" ? lastSub : null,
     project: { retv_modelled: cur ? cur.retv : 0, a_env: cur ? cur.a_env_m2 : 0, n_walls: p.walls.filter(w => w.external).length, n_openings: p.openings.length } });
 }
@@ -318,12 +470,39 @@ async function explain(useTier = true) {
 }
 $("x-go").onclick = () => explain(true);
 
-// ------------------------------------------------------------ step highlighting
-const links = [...document.querySelectorAll("#steps a")];
-const stepIds = ["s-project", "s-model", "s-goals", "s-studio", "s-results", "s-sun", "s-evidence"];
-const markStep = () => { let on = stepIds[0]; for (const id of stepIds) if ($(id).getBoundingClientRect().top < 140) on = id; links.forEach(a => a.classList.toggle("on", a.dataset.step === on)); };
-addEventListener("scroll", markStep, { passive: true }); markStep();
+// ------------------------------------------------------------ overview
+function renderOverview(res, sub, area, cur) {
+  const top = res.ranked[0], rows = heatRows(), hotYear = rows.length ? rows.reduce((a, b) => b.annual_kwh_m2 > a.annual_kwh_m2 ? b : a) : null;
+  const v = ST.activeVariant(db0, D.market, S.choices, S.studio), bud = v && v.price_inr != null ? ST.budgetFor(v, area || 0) : null;
+  $("ov-title").textContent = S.name || "Your project at a glance";
+  $("ov-tiles").innerHTML =
+    `<div class="card tile"><p class="k">Ranks first</p><p class="v">${top ? esc(SHORT(top.id)) : "–"}</p><p class="d">${top ? `partial score ${f(top.score, 3)} · ${res.ranked.length} of ${db.candidates.length} options have enough evidence` : "no option meets the evidence gate"}</p></div>` +
+    `<div class="card tile"><p class="k">Envelope RETV ${S.applyAll ? "with " + esc(SHORT(S.studio)) : "as modelled"}</p>${cur ? C.meter(cur.retv, cur.limit, { unit: "W/m²", size: 150, title: "RETV" }) : `<p class="v">–</p><p class="d">needs wall U-values; tick “use for all walls” on Materials</p>`}</div>` +
+    `<div class="card tile"><p class="k">Hottest wall over the year</p><p class="v" style="font-size:1.3rem">${hotYear ? esc(hotYear.wall.orientation) + " · " + Math.round(hotYear.wall.azimuth_deg ?? 0) + "°" : "–"}</p><p class="d">${hotYear ? `${Math.round(hotYear.annual_kwh_m2)} kWh/m² a year on ${f(hotYear.wall.area_m2, 1)} m²` : "load a model"}</p></div>` +
+    `<div class="card tile"><p class="k">${esc(SHORT(S.studio))} units for the walls</p><p class="v">${bud && area ? inr(bud.total) : "–"}</p><p class="d">${bud && area ? `${f(area, 0)} m² · ${Math.ceil(bud.pieces_total).toLocaleString("en-IN")} units${S.budget ? ` · <span class="tag ${bud.total <= S.budget ? "good" : "bad"}">${bud.total <= S.budget ? "within" : "over"} budget</span>` : ""}` : "choose a priced material"}</p></div>`;
+  const steps = [["site", "Site", S.lat != null ? `${f(S.lat, 2)} N, ${f(S.lon, 2)} E` : "pick the location", S.lat != null],
+    ["model", "3D model", SRC_TXT[S.src] + (S.context.length ? ` · ${S.context.length} context` : ""), true],
+    ["materials", "Goals", PRESETS[S.preset]?.t || "custom weights", S.preset !== "balanced" || S.budget != null],
+    ["materials", "Material", SHORT(S.studio) + (S.choices[S.studio] && S.choices[S.studio] !== "base" ? " · variant chosen" : ""), !!S.choices[S.studio]]];
+  $("ov-steps").innerHTML = steps.map(([t, h, d, done]) => `<a href="#${t}" class="${done ? "done" : ""}"><b>${h}</b><span>${esc(d)}</span></a>`).join("");
+  const names = db.criteria.map(c => AX[c.id]);
+  $("ov-stack").innerHTML = res.ranked.length ? C.stackedBars(res.ranked.map(r => ({ id: r.id, label: SHORT(r.id), total: r.score, parts: r.breakdown.map(b => ({ name: AX[b.criterion_id], value: b.contribution })) })), names, { width: W("ov-stack") }) : "<p class='mut'>Nothing ranked.</p>";
+  const rr = Object.entries(sub).sort((a, b) => a[1].retv - b[1].retv).map(([id, r]) => ({ id, fill: id === S.studio ? "var(--s2)" : null, label: SHORT(id), value: r.retv }));
+  $("ov-retv").innerHTML = rr.length ? C.rankedBars(rr, { unit: "W/m²", limit: { value: db.retv.limit_w_m2, label: "ENS 15" }, width: W("ov-retv") }) : "<p class='mut'>Load a model with wall areas.</p>";
+}
 
+// ------------------------------------------------------------ tabs
+const VIEWS = ["overview", "site", "model", "materials", "results", "climate", "evidence"];
+function showTab(name) {
+  if (!VIEWS.includes(name)) name = "overview";
+  for (const v of VIEWS) $("v-" + v).classList.toggle("on", v === name);
+  document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.v === name));
+  if (location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
+  requestAnimationFrame(() => { update(); if (name === "site") map?.invalidateSize(); if (name === "model") { ws?.resize(); renderQuantities(); } });
+  scrollTo({ top: 0 });
+}
+document.querySelectorAll("#tabs a").forEach(a => a.onclick = e => { e.preventDefault(); showTab(a.dataset.v); });
+addEventListener("hashchange", () => showTab(location.hash.slice(1)));
 let rz = null; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(update, 200); });
 
 // ------------------------------------------------------------ material studio
@@ -391,105 +570,120 @@ function renderStudio(res, sub, area) {
 const hlStyle = document.createElement("style"); document.head.appendChild(hlStyle);
 document.addEventListener("pointerover", e => { const el = e.target.closest?.("[data-cand]"); const id = el?.dataset.cand;
   hlStyle.textContent = id ? `svg.chart [data-cand]:not([data-cand="${CSS.escape(id)}"]){opacity:.22} svg.chart [data-cand="${CSS.escape(id)}"]{opacity:1}` : ""; });
-document.addEventListener("click", e => { const el = e.target.closest?.("svg.chart [data-cand]"); if (el?.dataset.cand && db.candidates.some(c => c.id === el.dataset.cand)) { selectStudio(el.dataset.cand); $("s-studio").scrollIntoView(); } });
+document.addEventListener("click", e => { const el = e.target.closest?.("svg.chart [data-cand]"); if (el?.dataset.cand && db.candidates.some(c => c.id === el.dataset.cand)) { selectStudio(el.dataset.cand); showTab("materials"); } });
 
 // ------------------------------------------------------------ viewer paint + sun study
-function paintViewer() {
-  if (!viewer) return;
-  if (S.whMode !== "u" && S.src !== "manual") { renderWallHeat(); return; }
-  const u = S.applyAll && derived[S.studio]?.u_value ? derived[S.studio].u_value.value : null;
-  viewer.recolor(w => (u != null && w.external !== false) ? u : w.u_value);
-}
-const siteLat = () => S.lat ?? (lastProject || currentProject()).site.lat ?? cities[S.city].lat;
-const siteLon = () => S.lon ?? (lastProject || currentProject()).site.lon ?? cities[S.city].lon;
+function paintViewer() { renderWallHeat(); }
+const projSite = () => { const s = (lastProject || currentProject()).site; return inIndia(s) ? s : null; };
+const siteLat = () => S.lat ?? projSite()?.lat ?? cities[S.city].lat;
+const siteLon = () => S.lon ?? projSite()?.lon ?? cities[S.city].lon;
 $("sun-m").innerHTML = SOL.MONTHS.map((m, i) => `<option value="${i}">${m}</option>`).join("");
 $("sun-m").value = S.sunMonth; $("sun-h").value = S.sunHour; $("sun-now").checked = S.sunNow;
 $("sun-m").onchange = e => { S.sunMonth = +e.target.value; S.sunNow = false; $("sun-now").checked = false; save(); sunStudy(); };
 $("sun-h").oninput = e => { S.sunHour = +e.target.value; S.sunNow = false; $("sun-now").checked = false; save(); sunStudy(); };
 $("sun-now").onchange = e => { S.sunNow = e.target.checked; save(); sunStudy(); };
+let lastSunNow = null;
 function sunStudy() {
   const lat = siteLat(), lon = siteLon();
   let s, label;
-  if (S.sunNow) { s = SOL.sunAt(new Date(), lat, lon); label = `now (solar ${f(s.solarTime, 2)} h)`; }
+  if (S.sunNow) { s = SOL.sunAt(new Date(), lat, lon); label = `now`; }
   else { const n = SOL.AVG_DAY[S.sunMonth]; s = SOL.sunFromHourAngle(lat, SOL.declination(n), 15 * (S.sunHour - 12));
-    const ist = SOL.istFromSolar(S.sunHour, n, lon); label = `${SOL.MONTHS[S.sunMonth]} average day, ${Math.floor(S.sunHour)}:${String(Math.round((S.sunHour % 1) * 60)).padStart(2, "0")} solar ≈ ${Math.floor(ist)}:${String(Math.round((ist % 1) * 60) % 60).padStart(2, "0")} IST`; }
+    const ist = SOL.istFromSolar(S.sunHour, n, lon); label = `≈ ${Math.floor(ist)}:${String(Math.round((ist % 1) * 60) % 60).padStart(2, "0")} IST`; }
   $("sun-hv").textContent = `${Math.floor(S.sunHour)}:${String(Math.round((S.sunHour % 1) * 60)).padStart(2, "0")}`;
-  $("sun-txt").textContent = `${label} · altitude ${f(s.altitude, 1)}°, azimuth ${f(s.azimuth, 0)}°${s.altitude <= 0 ? " (below horizon)" : ""}`;
-  viewer?.setSun(s.azimuth, s.altitude);
+  $("sun-txt").textContent = `${label} · altitude ${f(s.altitude, 0)}°, azimuth ${f(s.azimuth, 0)}°${s.altitude <= 0 ? " · below horizon" : ""}`;
+  ws?.setSun(s.azimuth, s.altitude);
   lastSunNow = S.sunNow ? s : null;
   renderWallHeat();
   return s;
 }
 
-// ------------------------------------------------------------ wall heat analysis (per BIM wall, exact azimuth)
-let lastSunNow = null, solarCache = { key: null, val: null }, playTimer = null;
+// ------------------------------------------------------------ wall heat analysis (per wall, exact azimuth, ray-traced shade)
+let solarCache = { key: null, val: null }, playTimer = null;
 const HEAT = ["#fde4d6", "#f9c4a6", "#f4a274", "#eb6834", "#c9531f", "#9c3f15", "#6e2b0c"];   // single-hue orange ramp for solar heat
 const heatColor = (v, hi) => HEAT[Math.max(0, Math.min(HEAT.length - 1, Math.floor((v / (hi || 1)) * HEAT.length)))];
-$("wh-mode").value = S.whMode; $("wh-abs").value = String(S.absorb);
-$("wh-mode").onchange = e => { S.whMode = e.target.value; save(); paintViewer(); renderWallHeat(); };
+const MODE_TXT = { now: "sun at the chosen time", month: "daily sun this month", year: "annual sun", u: "U-value" };
+const setMode = m => { S.whMode = m; $("wh-mode").value = m; $("wh-modes").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === m)); $("wh-mode-s").textContent = MODE_TXT[m]; };
+setMode(S.whMode); $("wh-abs").value = String(S.absorb);
+$("wh-modes").querySelectorAll("button").forEach(b => b.onclick = () => { setMode(b.dataset.v); save(); renderWallHeat(); });
 $("wh-abs").onchange = e => { S.absorb = +e.target.value; save(); renderWallHeat(); };
 $("wh-play").onclick = () => {
-  if (playTimer) { clearInterval(playTimer); playTimer = null; $("wh-play").textContent = "▶ Play the day"; return; }
-  S.sunNow = false; $("sun-now").checked = false; if (S.whMode === "u" || S.whMode === "year") { S.whMode = "now"; $("wh-mode").value = "now"; }
+  if (playTimer) { clearInterval(playTimer); playTimer = null; $("wh-play").textContent = "▶ Play day"; return; }
+  S.sunNow = false; $("sun-now").checked = false; if (S.whMode === "u" || S.whMode === "year") setMode("now");
   $("wh-play").textContent = "❚❚ Pause";
-  playTimer = setInterval(() => { S.sunHour = S.sunHour >= 18 ? 6 : S.sunHour + 0.25; $("sun-h").value = S.sunHour; sunStudy(); }, 180);
+  playTimer = setInterval(() => { S.sunHour = S.sunHour >= 18 ? 6 : S.sunHour + 0.25; $("sun-h").value = S.sunHour; sunStudy(); }, 160);
 };
 function wallsForHeat() {
   const p = lastProject || currentProject();
   const u = S.applyAll && derived[S.studio]?.u_value ? derived[S.studio].u_value.value : null;
-  return p.walls.filter(w => w.external && w.area_m2 != null).map(w => ({ ...w, u_eff: u ?? w.u_value ?? (derived[S.studio]?.u_value?.value ?? null) }));
+  return p.walls.filter(w => w.external && w.area_m2).map(w => ({ ...w, u_eff: u ?? w.u_value ?? (derived[S.studio]?.u_value?.value ?? null) }));
 }
 function computeWallSolar(walls) {
   const lat = siteLat(), key = [lat.toFixed(3), S.city, walls.map(w => w.id + ":" + (w.azimuth_deg ?? w.orientation) + ":" + w.area_m2).join("|")].join("/");
   if (solarCache.key !== key) solarCache = { key, val: SOL.wallSolar(lat, cities[S.city].monthly.ALLSKY_SFC_SW_DWN, walls) };
   return solarCache.val;
 }
-function renderWallHeat() {
-  const walls = wallsForHeat();
-  if (!walls.length) { $("wh-tiles").innerHTML = "<p class='mut'>Needs a model or facade areas.</p>"; $("wh-now").innerHTML = $("wh-year").innerHTML = $("wh-table").innerHTML = ""; return; }
+// shaded hourly irradiance: diffuse + reflected unchanged, direct x sunlit fraction
+const shadedAt = (F, m, x, h) => { const tot = F[m].hourly[x.key][h], bm = F[m].beam[x.key][h], fr = shade?.[x.wall.id]?.[m]?.[h]; return fr == null ? tot : tot - bm + bm * fr; };
+function heatRows() {
+  const walls = wallsForHeat(); if (!walls.length) return [];
   const { F, per } = computeWallSolar(walls);
   const m = lastSunNow ? new Date().getMonth() : S.sunMonth;
-  const hourIdx = Math.max(0, Math.min(23, Math.floor(lastSunNow ? lastSunNow.solarTime : S.sunHour)));
-  const rows = per.map(x => {
-    const I = F[m].hourly[x.key][hourIdx], day = F[m].daily[x.key];
+  const h = Math.max(0, Math.min(23, Math.floor(lastSunNow ? lastSunNow.solarTime : S.sunHour)));
+  return per.map(x => {
+    const I = shadedAt(F, m, x, h);
+    const dayH = Array.from({ length: 24 }, (_, k) => shadedAt(F, m, x, k)), day = dayH.reduce((a, b) => a + b, 0) / 1000;
+    let annual = 0, annualUnshaded = 0, beamTot = 0, beamLost = 0;
+    for (let mm = 0; mm < 12; mm++) for (let k = 0; k < 24; k++) {
+      const v = shadedAt(F, mm, x, k); annual += v * SOL.MONTH_DAYS[mm] / 1000; annualUnshaded += F[mm].hourly[x.key][k] * SOL.MONTH_DAYS[mm] / 1000;
+      const bm = F[mm].beam[x.key][k], fr = shade?.[x.wall.id]?.[mm]?.[k]; beamTot += bm; if (fr != null) beamLost += bm * (1 - fr);
+    }
     const q = x.wall.u_eff != null ? SOL.solarHeatFlux(x.wall.u_eff, S.absorb, I) : null;
-    const peakH = F[m].hourly[x.key].indexOf(Math.max(...F[m].hourly[x.key]));
-    return { ...x, I, day, q, qWall: q != null ? q * x.wall.area_m2 : null, peakH };
+    const fr = shade?.[x.wall.id]?.[m]?.[h], bmNow = F[m].beam[x.key][h];
+    return { ...x, I, day, q, qWall: q != null ? q * x.wall.area_m2 : null, peakH: dayH.indexOf(Math.max(...dayH)), annual_kwh_m2: annual, annual_kwh: annual * x.wall.area_m2,
+      annualUnshaded, shadeLoss: beamTot ? beamLost / beamTot : 0, sunlit: bmNow > 1 ? fr ?? 1 : null, hourly: dayH };
   });
+}
+function renderWallHeat() {
+  const rows = heatRows();
+  if (!rows.length) { $("wh-tiles").innerHTML = "<p class='mut'>Load a model or enter facade areas.</p>"; $("wh-now").innerHTML = $("wh-year").innerHTML = $("wh-table").innerHTML = ""; return; }
+  const m = lastSunNow ? new Date().getMonth() : S.sunMonth, hourIdx = Math.max(0, Math.min(23, Math.floor(lastSunNow ? lastSunNow.solarTime : S.sunHour)));
   const maxBy = k => rows.reduce((a, b) => (b[k] ?? -1) > (a[k] ?? -1) ? b : a);
-  const hotNow = maxBy("I"), hotMonth = maxBy("day"), hotYear = maxBy("annual_kwh_m2"), mostEnergy = maxBy("annual_kwh");
-  const lbl = r => `${r.wall.name} (${r.wall.orientation}${r.azimuth != null ? ", " + Math.round(r.azimuth) + "°" : ""})`;
-  const timeTxt = lastSunNow ? "now" : `${SOL.MONTHS[m]}, ${hourIdx}:00–${hourIdx + 1}:00 solar time`;
-  $("wh-sub").textContent = `Per wall, using each wall's own compass direction from the model. Shown for ${timeTxt}; change the month or solar time in the sun study above, or press play.`;
+  const hotNow = maxBy("I"), hotMonth = maxBy("day"), hotYear = maxBy("annual_kwh_m2"), mostShaded = maxBy("shadeLoss");
+  const lbl = r => `${r.wall.name.length > 28 ? r.wall.orientation + " wall" : r.wall.name} · ${r.wall.orientation} ${Math.round(r.wall.azimuth_deg ?? 0)}°`;
+  $("wh-sub").textContent = `${rows.length} external walls, each on its own compass direction from the 3D geometry${shade ? ", with ray-traced shade" : " (shade being computed)"}. ${lastSunNow ? "Now" : `${SOL.MONTHS[m]}, ${hourIdx}:00–${hourIdx + 1}:00 solar`}.`;
   $("wh-tiles").innerHTML =
-    `<div class="card tile"><p class="k">Most sun right now</p><p class="v" style="font-size:1.25rem">${hotNow.I > 1 ? esc(lbl(hotNow)) : "no direct sun"}</p><p class="d">${hotNow.I > 1 ? `${Math.round(hotNow.I)} W/m² on the wall${hotNow.q != null ? ` · about ${f(hotNow.q, 1)} W/m² into the room (${Math.round(hotNow.qWall)} W for the wall)` : ""}` : "sun below the horizon or behind every wall"}</p></div>` +
-    `<div class="card tile"><p class="k">Most heated wall in ${SOL.MONTHS[m]}</p><p class="v" style="font-size:1.25rem">${esc(lbl(hotMonth))}</p><p class="d">${f(hotMonth.day, 2)} kWh/m² per day, peak around ${hotMonth.peakH}:00–${hotMonth.peakH + 1}:00 solar</p></div>` +
-    `<div class="card tile"><p class="k">Most heated over the year</p><p class="v" style="font-size:1.25rem">${esc(lbl(hotYear))}</p><p class="d">${Math.round(hotYear.annual_kwh_m2)} kWh/m² a year${mostEnergy.wall.id !== hotYear.wall.id ? ` · largest total on one wall: ${esc(mostEnergy.wall.name)} (${Math.round(mostEnergy.annual_kwh).toLocaleString("en-IN")} kWh, bigger area)` : ` · ${Math.round(hotYear.annual_kwh).toLocaleString("en-IN")} kWh on the whole wall`}</p></div>`;
-  const hiNow = Math.max(1, ...F.flatMap(mm => per.map(x => Math.max(...mm.hourly[x.key]))));
-  $("wh-now").innerHTML = C.rankedBars(rows.slice().sort((a, b) => b.I - a.I).map(r => ({ label: r.wall.name + " · " + r.wall.orientation, value: r.I, tipLabel: lbl(r) + (r.q != null ? ` · ≈${f(r.q, 1)} W/m² into room` : "") })), { unit: "W/m²", decimals: 0, max: Math.ceil(hiNow / 100) * 100, width: W("wh-now"), title: "solar now per wall" });
-  $("wh-year").innerHTML = C.rankedBars(rows.slice().sort((a, b) => b.annual_kwh_m2 - a.annual_kwh_m2).map(r => ({ label: r.wall.name + " · " + r.wall.orientation, value: r.annual_kwh_m2, tipLabel: `${lbl(r)} · ${Math.round(r.annual_kwh).toLocaleString("en-IN")} kWh on ${f(r.wall.area_m2, 1)} m²` })), { unit: "kWh/m²·yr", decimals: 0, width: W("wh-year"), title: "annual solar per wall" });
-  $("wh-table").innerHTML = `<table><tr><th>Wall</th><th>Facing</th><th class="num">Area m²</th><th class="num">U</th><th class="num">Solar now W/m²</th><th class="num">Into room now W/m²</th><th class="num">${SOL.MONTHS[m]} kWh/m²·day</th><th class="num">Year kWh/m²</th><th class="num">Year kWh (wall)</th></tr>` +
-    rows.map(r => `<tr${r === hotYear ? ' style="background:var(--warn-wash)"' : ""}><td>${esc(r.wall.name)}</td><td>${r.wall.orientation}${r.azimuth != null ? ` <span class="small mut">${Math.round(r.azimuth)}°</span>` : ""}</td><td class="num">${f(r.wall.area_m2, 1)}</td><td class="num">${r.wall.u_eff != null ? f(r.wall.u_eff) : "–"}</td><td class="num">${Math.round(r.I)}</td><td class="num">${r.q != null ? f(r.q, 1) : "–"}</td><td class="num">${f(r.day, 2)}</td><td class="num">${Math.round(r.annual_kwh_m2)}</td><td class="num">${Math.round(r.annual_kwh).toLocaleString("en-IN")}</td></tr>`).join("") + `</table>`;
-  // 3D colours
-  if (viewer && S.whMode !== "u") {
-    const byId = Object.fromEntries(rows.map(r => [r.wall.id, r]));
+    `<div class="card tile"><p class="k">Most sun now</p><p class="v" style="font-size:1.2rem">${hotNow.I > 1 ? esc(lbl(hotNow)) : "No direct sun"}</p><p class="d">${hotNow.I > 1 ? `${Math.round(hotNow.I)} W/m²${hotNow.q != null ? ` · ≈ ${f(hotNow.q, 1)} W/m² into the room` : ""}` : "sun down or behind every wall"}</p></div>` +
+    `<div class="card tile"><p class="k">Hottest in ${SOL.MONTHS[m]}</p><p class="v" style="font-size:1.2rem">${esc(lbl(hotMonth))}</p><p class="d">${f(hotMonth.day, 2)} kWh/m² a day · peaks ${hotMonth.peakH}:00 solar</p></div>` +
+    `<div class="card tile"><p class="k">Hottest over the year</p><p class="v" style="font-size:1.2rem">${esc(lbl(hotYear))}</p><p class="d">${Math.round(hotYear.annual_kwh_m2)} kWh/m² a year${shade && mostShaded.shadeLoss > 0.02 ? ` · most shaded: ${esc(lbl(mostShaded))} (${Math.round(mostShaded.shadeLoss * 100)}% of direct sun blocked)` : ""}</p></div>`;
+  const F = computeWallSolar(wallsForHeat()).F;
+  const hiNow = Math.max(1, ...rows.map(r => Math.max(...F.flatMap((mm, i) => mm.hourly[r.key]))));
+  const top = rows.slice().sort((a, b) => b.I - a.I).slice(0, 14), topY = rows.slice().sort((a, b) => b.annual_kwh_m2 - a.annual_kwh_m2).slice(0, 14);
+  $("wh-now").innerHTML = C.rankedBars(top.map(r => ({ label: lbl(r), value: r.I, tipLabel: `${r.wall.name}${r.sunlit != null ? ` · ${Math.round(r.sunlit * 100)}% sunlit` : ""}` })), { unit: "W/m²", decimals: 0, max: Math.ceil(hiNow / 100) * 100, width: W("wh-now"), title: "solar now per wall" }) + (rows.length > 14 ? `<p class="small mut">Top 14 of ${rows.length} walls.</p>` : "");
+  $("wh-year").innerHTML = C.rankedBars(topY.map(r => ({ label: lbl(r), value: r.annual_kwh_m2, tipLabel: `${r.wall.name} · ${Math.round(r.annual_kwh).toLocaleString("en-IN")} kWh on ${f(r.wall.area_m2, 1)} m² · unshaded ${Math.round(r.annualUnshaded)}` })), { unit: "kWh/m²·yr", decimals: 0, width: W("wh-year"), title: "annual solar per wall" });
+  $("wh-table").innerHTML = `<table><tr><th>Wall</th><th>Facing</th><th class="num">Area m²</th><th class="num">U</th><th class="num">Now W/m²</th><th class="num">Into room</th><th class="num">${SOL.MONTHS[m]} kWh/m²·d</th><th class="num">Year kWh/m²</th><th class="num">Shade</th><th class="num">Year kWh</th></tr>` +
+    rows.map(r => `<tr${r === hotYear ? ' style="background:var(--warn-wash)"' : ""}><td>${esc(r.wall.name)}</td><td>${r.wall.orientation} <span class="small mut">${Math.round(r.wall.azimuth_deg ?? 0)}°</span></td><td class="num">${f(r.wall.area_m2, 1)}</td><td class="num">${r.wall.u_eff != null ? f(r.wall.u_eff) : "–"}</td><td class="num">${Math.round(r.I)}</td><td class="num">${r.q != null ? f(r.q, 1) : "–"}</td><td class="num">${f(r.day, 2)}</td><td class="num">${Math.round(r.annual_kwh_m2)}</td><td class="num">${shade ? Math.round(r.shadeLoss * 100) + "%" : "…"}</td><td class="num">${Math.round(r.annual_kwh).toLocaleString("en-IN")}</td></tr>`).join("") + `</table>`;
+  if (!ws) return;
+  const byId = Object.fromEntries(rows.map(r => [r.wall.id, r]));
+  if (S.whMode !== "u") {
     const val = r => S.whMode === "now" ? r.I : S.whMode === "month" ? r.day : r.annual_kwh_m2;
     const hi = S.whMode === "now" ? hiNow : Math.max(...rows.map(val));
     const glow = S.whMode === "now" ? (hotNow.I > 1 ? hotNow.wall.id : null) : S.whMode === "month" ? hotMonth.wall.id : hotYear.wall.id;
-    viewer.recolorWith(w => byId[w.id] ? heatColor(val(byId[w.id]), hi) : "#b9b8b0", glow);
-    const unit = S.whMode === "now" ? "W/m²" : S.whMode === "month" ? "kWh/m²·day" : "kWh/m²·yr";
-    viewer.setLabels(rows.map(r => ({ wallId: r.wall.id, hot: r.wall.id === glow, html: `<b>${esc(r.wall.orientation)}</b> ${S.whMode === "now" ? Math.round(r.I) : S.whMode === "month" ? f(r.day, 2) : Math.round(r.annual_kwh_m2)} ${unit}${r.wall.id === glow ? " ▲" : ""}` })));
-    $("v-status").textContent = `Walls are coloured by ${S.whMode === "now" ? "solar radiation at the chosen time" : S.whMode === "month" ? "daily solar this month" : "annual solar"}; ▲ marks the most heated wall. The compass shows true north; shadows follow the sun study.`;
+    ws.recolorWith((w, id) => byId[id] ? heatColor(val(byId[id]), hi) : "#cfcbc3", glow);
+    const unit = S.whMode === "now" ? "W/m²" : S.whMode === "month" ? "kWh/m²·d" : "kWh/m²·yr";
+    const best = {}; for (const r of rows) if (!best[r.wall.orientation] || val(r) > val(best[r.wall.orientation])) best[r.wall.orientation] = r;   // one label per facade direction
+    const show = Object.values(best);
+    ws.setLabels(show.map(r => ({ pos: r.wall.labelPos, hot: r.wall.id === glow, html: `<b>${esc(r.wall.orientation)}</b> ${S.whMode === "month" ? f(val(r), 2) : Math.round(val(r))} ${unit}${r.wall.id === glow ? " ▲" : ""}` })));
     $("ramp").innerHTML = HEAT.map(c => `<i style="background:${c}"></i>`).join("");
-    $("ramp").parentElement.querySelector("span").textContent = S.whMode === "now" ? "Solar now" : S.whMode === "month" ? "Solar, month" : "Solar, year";
-    $("ramp").parentElement.lastElementChild.textContent = `0 → ${Math.round(hi)} ${S.whMode === "now" ? "W/m²" : S.whMode === "month" ? "kWh/m²·day" : "kWh/m²·yr"}`;
-  } else if (viewer) {
+    $("ramp").parentElement.querySelector("span").textContent = S.whMode === "now" ? "Sun now" : S.whMode === "month" ? "Sun, month" : "Sun, year";
+    $("ramp").parentElement.lastElementChild.textContent = `0 → ${Math.round(hi)} ${unit}`;
+  } else {
     $("ramp").innerHTML = RAMP_STOPS.map(c => `<i style="background:${c}"></i>`).join("");
     $("ramp").parentElement.querySelector("span").textContent = "U-value"; $("ramp").parentElement.lastElementChild.textContent = "0 → 2.5+ W/m²K";
-    const u = S.applyAll && derived[S.studio]?.u_value ? derived[S.studio].u_value.value : null;
-    viewer.recolorWith(w => uColorOf(u != null && w.external !== false ? u : w.u_value));
-    viewer.setLabels(walls.map(w => ({ wallId: w.id, html: `<b>${esc(w.orientation)}</b> U ${w.u_eff != null ? f(w.u_eff) : "–"}` })));
+    ws.recolorWith((w, id) => byId[id] ? uColorOf(byId[id].wall.u_eff) : "#cfcbc3");
+    const one = {}; for (const r of rows) one[r.wall.orientation] ||= r;
+    ws.setLabels(Object.values(one).map(r => ({ pos: r.wall.labelPos, html: `<b>${esc(r.wall.orientation)}</b> U ${r.wall.u_eff != null ? f(r.wall.u_eff) : "–"}` })));
   }
+  if (selInfo) renderSelection();
 }
 
 // ------------------------------------------------------------ sun & solar charts
@@ -570,11 +764,11 @@ async function detectBackend() {
 }
 
 // ------------------------------------------------------------ boot
-if (S.src === "ifc" && !S.ifcProject) S.src = "sample";
+if (S.src === "ifc" && !S.ifcProject) S.src = "duplex";
 await detectBackend();
 try {
   const sb = await (await fetch("data/sample_house.ifc")).arrayBuffer();
   if (BACKEND) { const r = await fetch("api/ifc", { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: sb }); if (r.ok) sampleProject = await r.json(); else throw new Error(); }
   else sampleProject = B.analyse(new TextDecoder().decode(sb), db, derived);
 } catch { try { sampleProject = B.analyse(await (await fetch("data/sample_house.ifc")).text(), db, derived); } catch { /* keep the Python-built copy */ } }
-renderSliders(); renderModelSide(); initMap(); loadModel();
+renderSliders(); showTab(location.hash.slice(1) || "overview"); initMap(); loadModel();
