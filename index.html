@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Envelope Studio</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{
   color-scheme:light;
@@ -27,9 +29,10 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-
 a{color:var(--acc)}
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.brand{font-weight:650;letter-spacing:-.01em;font-size:1.05rem}.brand small{font-weight:400;color:var(--muted);margin-left:6px}
-.steps{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
-.steps a{text-decoration:none;color:var(--ink-2);font-size:.86rem;padding:6px 11px;border-radius:99px;border:1px solid transparent}
+.brand{white-space:nowrap;font-weight:650;letter-spacing:-.01em;font-size:1.05rem}.brand small{font-weight:400;color:var(--muted);margin-left:6px}
+.steps{display:flex;gap:2px;flex-wrap:nowrap;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}.steps::-webkit-scrollbar{display:none}
+.top-in{flex-wrap:nowrap}@media (max-width:1100px){.brand small{display:none}.steps a{padding:6px 8px;font-size:.82rem}}
+.steps a{white-space:nowrap;text-decoration:none;color:var(--ink-2);font-size:.86rem;padding:6px 11px;border-radius:99px;border:1px solid transparent}
 .steps a b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);font-size:.72rem;margin-right:6px;color:var(--ink-2)}
 .steps a:hover{background:var(--surface)}.steps a.on{background:var(--acc-wash);color:var(--ink)}.steps a.on b{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .icon-btn{border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:8px;padding:5px 9px;cursor:pointer;font:inherit;font-size:.82rem}
@@ -45,7 +48,7 @@ p.lead{color:var(--ink-2);margin:0 0 14px;font-size:.92rem}
 .grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .span2{grid-column:span 2}
 @media (max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:640px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.span2{grid-column:auto}.top-in{gap:8px 10px}.brand small{display:none}#theme{margin-left:auto}.steps{order:3;width:100%;margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.steps a{white-space:nowrap;padding:5px 9px}html{scroll-padding-top:100px}}
+@media (max-width:640px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.span2{grid-column:auto}.top-in{gap:8px 10px;flex-wrap:wrap}.brand small{display:none}#theme{margin-left:auto}.steps{order:3;width:100%;margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.steps a{white-space:nowrap;padding:5px 9px}html{scroll-padding-top:100px}}
 label.f{display:block;font-size:.8rem;color:var(--ink-2);margin:0 0 10px}
 label.f span{display:block;margin-bottom:4px;font-weight:550;color:var(--ink)}
 input[type=text],input[type=number],select,textarea{width:100%;font:inherit;font-size:.9rem;padding:8px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink)}
@@ -87,6 +90,21 @@ svg .mark{cursor:default;transition:opacity .12s}svg .mark:hover,svg .mark:focus
 .exp p{margin:.55rem 0;font-size:.92rem}.audit-ok{color:var(--good-ink)}.audit-bad{color:var(--critical)}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.84rem}.kv dt{color:var(--muted)}.kv dd{margin:0}
 .slider{display:grid;grid-template-columns:150px 1fr 44px;gap:8px;align-items:center;font-size:.82rem;margin:4px 0}.slider input{width:100%}
+#map{height:360px;border-radius:12px;border:1px solid var(--line);margin-top:8px;position:relative;z-index:0}
+@media (max-width:640px){#map{height:280px}}
+.map-compass{position:absolute;right:10px;top:10px;z-index:500;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);display:grid;place-items:center;font-weight:700;color:#d03b3b;box-shadow:var(--shadow)}
+.map-compass::before{content:"";position:absolute;top:4px;left:50%;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #d03b3b;transform:translateX(-50%)}
+.site-pin{width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--acc);border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.compass{position:absolute;right:10px;top:10px;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.12))}
+.compass svg{transition:transform .05s linear}
+.sunbar{margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:6px 12px;font:inherit;font-size:.84rem;cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.chips button i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chips button.on{border-color:var(--acc);background:var(--acc-wash);box-shadow:inset 0 0 0 1px var(--acc)}
+ul.lst{margin:6px 0 0;padding-left:18px;font-size:.86rem}ul.lst li{margin:5px 0}
+.src{font-size:.72rem;color:var(--muted);margin-left:4px}
+.ifc-help{background:var(--acc-wash);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);border-radius:10px;padding:10px 12px;font-size:.84rem;margin-top:10px}
 footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
 .small{font-size:.8rem}.mut{color:var(--muted)}
 </style>
@@ -98,8 +116,10 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
     <a href="#s-project" data-step="s-project"><b>1</b>Project</a>
     <a href="#s-model" data-step="s-model"><b>2</b>Model</a>
     <a href="#s-goals" data-step="s-goals"><b>3</b>Goals &amp; budget</a>
-    <a href="#s-results" data-step="s-results"><b>4</b>Results</a>
-    <a href="#s-evidence" data-step="s-evidence"><b>5</b>Evidence</a>
+    <a href="#s-studio" data-step="s-studio"><b>4</b>Materials</a>
+    <a href="#s-results" data-step="s-results"><b>5</b>Results</a>
+    <a href="#s-sun" data-step="s-sun"><b>6</b>Sun &amp; climate</a>
+    <a href="#s-evidence" data-step="s-evidence"><b>7</b>Evidence</a>
   </nav>
   <span class="tag" id="backend" style="margin-left:4px">checking…</span>
   <button class="icon-btn" id="theme" title="Switch light / dark">Theme</button>
@@ -129,6 +149,13 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
       <p class="small mut">Notes are kept with your project in this browser only. They are not scored.</p>
     </div>
   </div>
+  <div class="card" style="margin-top:14px">
+    <div class="row" style="justify-content:space-between"><div><h3>Site location</h3><p class="sub">Click the map or drag the pin. Lines show today's sunrise, sunset and current sun direction from the site.</p></div>
+      <div class="row"><input type="text" id="geo-q" placeholder="Search a place in India (OpenStreetMap)" style="width:280px"><button class="btn" id="geo-go">Search</button></div></div>
+    <div id="geo-res" class="small"></div>
+    <div id="map" aria-label="site map"><div class="map-compass" aria-hidden="true">N</div></div>
+    <p class="small mut" id="map-note">Map data &copy; OpenStreetMap contributors. Place searches are sent to the OpenStreetMap Nominatim service; nothing else leaves your browser.</p>
+  </div>
 
   <h2 class="sec" id="s-model"><span class="n">2</span>Model</h2>
   <p class="lead">Upload an IFC file (IFC2x3 or IFC4) exported from Revit, ArchiCAD or BlenderBIM, use the sample house, or type facade areas. The file is read in your browser and is not uploaded anywhere.</p>
@@ -139,6 +166,13 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
         <div class="ramp"><span>U-value</span><span class="bar" id="ramp"></span><span>0 → 2.5+ W/m²K</span></div>
       </div>
       <div id="viewer" aria-label="3D model view"></div>
+      <div class="row sunbar">
+        <b class="small">Sun study</b>
+        <label class="small">Month <select id="sun-m" style="width:auto"></select></label>
+        <label class="small" style="flex:1;min-width:180px">Solar time <input type="range" id="sun-h" min="6" max="18" step="0.25" style="width:60%"> <b id="sun-hv"></b></label>
+        <label class="small"><input type="checkbox" id="sun-now"> Now</label>
+        <span class="small mut" id="sun-txt"></span>
+      </div>
       <p class="small mut" id="v-status" style="margin:8px 0 0"></p>
     </div>
     <div class="card" id="m-side"></div>
@@ -166,7 +200,23 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
       <div class="row"><label class="f" style="flex:1"><span>Target wall U (W/m²K)</span><input type="number" id="e-u" step="0.1" placeholder="e.g. 1.0"></label><label class="f" style="flex:1"><span>Target RETV (W/m²)</span><input type="number" id="e-retv" step="1" placeholder="15 (ENS) or 12"></label></div></div>
   </div>
 
-  <h2 class="sec" id="s-results"><span class="n">4</span>Results</h2>
+  <h2 class="sec" id="s-studio"><span class="n">4</span>Material studio</h2>
+  <p class="lead">Pick a wall material and a product size or market listing for this project. Budget, data, score, suitability and savings update from the engines; nothing is written by a language model. Hover any chart mark to trace the same material everywhere; click to open it here.</p>
+  <div class="card"><div class="chips" id="st-chips"></div>
+    <div class="row" style="margin-top:10px"><label class="f" style="flex:1;min-width:260px;margin:0"><span>Product / size / market</span><select id="st-var"></select></label>
+      <label class="small" style="margin-top:18px"><input type="checkbox" id="st-apply"> Use for all external walls in the 3D model and the RETV</label></div></div>
+  <div class="grid g4" style="margin-top:14px" id="st-tiles"></div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card"><h3>Criteria rose</h3><p class="sub">Normalised score per criterion within the ranked set; hatched = no cited data.</p><div id="st-rose"></div></div>
+    <div class="card span2"><h3>Material data</h3><p class="sub">Assembly values from ENS 2024; product values are manufacturer claims or secondary summaries (grade C).</p><div class="scroll" id="st-data"></div></div>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card"><h3>Why it scores this way</h3><ul class="lst" id="st-why"></ul></div>
+    <div class="card"><h3>Suitability for this project</h3><ul class="lst" id="st-fit"></ul></div>
+    <div class="card"><h3>How to reduce cost, heat gain and carbon</h3><ul class="lst" id="st-save"></ul><div id="st-links" class="small"></div></div>
+  </div>
+
+  <h2 class="sec" id="s-results"><span class="n">5</span>Results</h2>
   <p class="lead" id="r-lead"></p>
   <div class="grid g4" id="r-tiles"></div>
   <div class="grid g2" style="margin-top:14px">
@@ -182,13 +232,20 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
     <div class="row"><select id="x-tier" style="width:auto"><option value="deterministic">Deterministic (offline, no model)</option><option value="ollama">Local Ollama model (optional)</option><option value="webllm">In-browser model, WebGPU (optional)</option></select><button class="btn primary" id="x-go">Explain this result</button><span id="x-status" class="small mut"></span></div>
     <div class="exp" id="x-out"></div></div>
 
-  <h2 class="sec" id="s-climate"><span class="n">☼</span>Climate</h2>
-  <p class="lead">Exposure inputs for the selected station. They raise flags and feed indicators, never a weighted score.</p>
+  <h2 class="sec" id="s-sun"><span class="n">6</span>Sun &amp; climate</h2>
+  <p class="lead">Sun geometry for the site and estimated solar exposure of each facade (monthly-average-day method on NASA POWER radiation, isotropic sky, no shading). Exposure inputs only: they explain the RETV orientation factors and never carry a weight.</p>
+  <div class="grid g3">
+    <div class="card"><h3>Sun path</h3><p class="sub" id="sp-sub"></p><div id="sp-chart"></div></div>
+    <div class="card"><h3>Facade solar exposure wheel</h3><p class="sub">Daily incident solar radiation, kWh/m² per day, by facade orientation (sectors) and month (rings, January inside).</p><div id="sw-chart"></div></div>
+    <div class="card"><h3>Daily solar by facade</h3><p class="sub" id="sf-sub"></p><div id="sf-chart"></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><div><h3>Hourly heat map</h3><p class="sub">Average incident solar radiation (W/m²) on the selected facade by month and solar hour.</p></div>
+    <label class="small">Facade <select id="hm-f" style="width:auto"></select></label></div><div class="scroll" id="hm-chart"></div></div>
   <div class="grid g4" id="c-tiles"></div>
   <div class="grid g4" style="margin-top:14px" id="c-charts"></div>
   <div class="note" id="c-flag"></div>
 
-  <h2 class="sec" id="s-evidence"><span class="n">5</span>Evidence</h2>
+  <h2 class="sec" id="s-evidence"><span class="n">7</span>Evidence</h2>
   <p class="lead">What each material's numbers rest on. Grade A is product-verified, B published research, C provisional; hatched cells have no usable value.</p>
   <div class="card"><div class="scroll" id="e-matrix"></div></div>
   <div class="grid" style="margin-top:14px">

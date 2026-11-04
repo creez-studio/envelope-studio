@@ -30,13 +30,33 @@ export class ModelViewer {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     this.renderer.setSize(w, h);
+    this.renderer.shadowMap.enabled = true;
     this.el.replaceChildren(this.renderer.domElement);
+    // compass overlay (true north), rotated every frame to match the camera
+    this.compass = document.createElement("div");
+    this.compass.className = "compass";
+    this.compass.innerHTML = `<svg viewBox="-50 -50 100 100" width="76" height="76" aria-label="true north compass"><circle r="46" fill="var(--surface)" stroke="var(--line-2)" stroke-width="2"/>` +
+      [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="0" y1="-40" x2="0" y2="${a % 90 ? -34 : -30}" stroke="var(--muted)" stroke-width="${a % 90 ? 1 : 2}" transform="rotate(${a})"/>`).join("") +
+      `<polygon points="0,-30 7,0 0,5 -7,0" fill="#d03b3b"/><polygon points="0,30 7,0 0,-5 -7,0" fill="var(--muted)"/><circle r="3" fill="var(--surface)" stroke="var(--ink)"/>` +
+      `<text y="-34" text-anchor="middle" font-size="13" font-weight="700" fill="#d03b3b" dy="-1" transform="translate(0,-2)">N</text></svg>`;
+    this.el.appendChild(this.compass);
+    this.tn = 0;
     this.controls = new Orbit(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8a80, 1.6));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(20, 40, 25); this.scene.add(sun);
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8a80, 1.2));
+    this.sun = new THREE.DirectionalLight(0xfff4e0, 1.8); this.sun.position.set(20, 40, 25); this.sun.castShadow = true;
+    this.sun.shadow.mapSize.set(2048, 2048); this.scene.add(this.sun); this.scene.add(this.sun.target);
+    this.sunBall = new THREE.Mesh(new THREE.SphereGeometry(0.6, 20, 12), new THREE.MeshBasicMaterial({ color: 0xeda100 }));
+    this.scene.add(this.sunBall);
     this.group = new THREE.Group(); this.scene.add(this.group);
-    const loop = () => { if (this.disposed) return; this.controls.update(); this.renderer.render(this.scene, this.camera); requestAnimationFrame(loop); };
+    const loop = () => {
+      if (this.disposed) return;
+      this.controls.update();
+      const f = this.controls.target.clone().sub(this.camera.position);
+      const rot = (-this.tn) - (Math.atan2(f.x, -f.z) * 180 / Math.PI);
+      this.compass.firstChild.style.transform = `rotate(${rot}deg)`;
+      this.renderer.render(this.scene, this.camera); requestAnimationFrame(loop);
+    };
     loop();
     new ResizeObserver(() => { const W = this.el.clientWidth, H = this.el.clientHeight; if (!W || !H) return; this.camera.aspect = W / H; this.camera.updateProjectionMatrix(); this.renderer.setSize(W, H); }).observe(this.el);
   }
@@ -75,12 +95,13 @@ export class ModelViewer {
       // local centre: (len/2, +t/2) in wall axes (layers run along +local y); IFC (x,y,z) -> three (x, z, -y)
       const lx = len / 2, ly = t / 2;
       const X = w.geom.x + Math.cos(th) * lx - Math.sin(th) * ly, Y = w.geom.y + Math.sin(th) * lx + Math.cos(th) * ly;
-      m.position.set(X, height / 2, -Y); m.rotation.y = th; m.userData = { wall: w };
+      m.position.set(X, height / 2, -Y); m.rotation.y = th; m.userData = { wall: w }; m.castShadow = true; m.receiveShadow = true;
       this.group.add(m); cx += X; cz += -Y; n++;
     }
     const walls = new THREE.Box3().setFromObject(this.group), sz = walls.getSize(new THREE.Vector3());
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(sz.x, sz.z, 6) * 2.2, Math.max(sz.x, sz.z, 6) * 2.2), new THREE.MeshStandardMaterial({ color: 0xe9e8e2 }));
-    ground.rotation.x = -Math.PI / 2; ground.position.set(cx / Math.max(n, 1), 0, cz / Math.max(n, 1)); this.group.add(ground);
+    ground.rotation.x = -Math.PI / 2; ground.position.set(cx / Math.max(n, 1), 0, cz / Math.max(n, 1)); ground.receiveShadow = true; this.group.add(ground);
+    this.tn = project.true_north_ccw_deg || 0;
     if (n) this.northArrow(project.true_north_ccw_deg || 0, { x: walls.max.x + 2.5, z: (walls.min.z + walls.max.z) / 2 });
     this.frame();
     return n;
@@ -109,7 +130,7 @@ export class ModelViewer {
         const w = wallByEid[mesh.expressID];
         const col = w ? uColor(w.u_value) : new THREE.Color(pg.color.x, pg.color.y, pg.color.z).getHexString().replace(/^/, "#");
         const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: col, roughness: 0.85, transparent: !w && pg.color.w < 1, opacity: w ? 1 : pg.color.w }));
-        m.matrixAutoUpdate = false; m.matrix.fromArray(pg.flatTransformation); m.userData = { wall: w };
+        m.matrixAutoUpdate = false; m.matrix.fromArray(pg.flatTransformation); m.userData = { wall: w }; m.castShadow = true; m.receiveShadow = true;
         this.group.add(m); count++;
         geo.delete();
       }
@@ -119,10 +140,30 @@ export class ModelViewer {
     const box = new THREE.Box3().setFromObject(this.group), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
     const side = Math.max(sz.x, sz.z, 6) * 2.2;
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(side, side), new THREE.MeshStandardMaterial({ color: 0xe9e8e2 }));
-    ground.rotation.x = -Math.PI / 2; ground.position.set(c.x, box.min.y - 0.01, c.z); this.group.add(ground);
+    ground.rotation.x = -Math.PI / 2; ground.position.set(c.x, box.min.y - 0.01, c.z); ground.receiveShadow = true; this.group.add(ground);
+    this.tn = project.true_north_ccw_deg || 0;
     this.northArrow(project.true_north_ccw_deg || 0, { x: box.max.x + 2.5, z: c.z });
     this.frame();
     return count;
+  }
+
+  /** Recolour wall meshes; uFn(wall) -> U-value or null. */
+  recolor(uFn) {
+    if (!this.group) return;
+    for (const c of this.group.children) if (c.userData && c.userData.wall) c.material.color.set(uColor(uFn(c.userData.wall)));
+  }
+
+  /** Place the sun: true azimuth (deg clockwise from true north) and altitude (deg). Shadows follow. */
+  setSun(azTrue, alt) {
+    const THREE = T; if (!this.group) return;
+    const box = new THREE.Box3(); this.group.children.forEach(c => { if (c.userData.wall !== undefined || c.geometry?.type === "BoxGeometry" || c.geometry?.type === "BufferGeometry") box.expandByObject(c); });
+    const c = box.isEmpty() ? new THREE.Vector3() : box.getCenter(new THREE.Vector3()), size = box.isEmpty() ? 12 : box.getSize(new THREE.Vector3()).length();
+    const azp = (azTrue - this.tn) * Math.PI / 180, al = Math.max(alt, -5) * Math.PI / 180, D = size * 1.4 + 8;
+    const dir = new THREE.Vector3(Math.sin(azp) * Math.cos(al), Math.sin(al), -Math.cos(azp) * Math.cos(al));
+    this.sun.position.copy(c).addScaledVector(dir, D); this.sun.target.position.copy(c);
+    this.sun.intensity = alt > 0 ? 1.8 : 0.05; this.sun.visible = alt > -2;
+    const cam = this.sun.shadow.camera, e = size * 0.9 + 4; cam.left = -e; cam.right = e; cam.top = e; cam.bottom = -e; cam.near = 0.5; cam.far = D * 2 + size; cam.updateProjectionMatrix();
+    this.sunBall.position.copy(c).addScaledVector(dir, Math.min(D, size * 0.8 + 6)); this.sunBall.visible = alt > 0;
   }
 
   dispose() { this.disposed = true; this.renderer?.dispose(); }

@@ -865,6 +865,53 @@
      "fire": "not_assessed",
      "moisture": "not_assessed"
     }
+   },
+   {
+    "id": "SCB",
+    "name": "Solid concrete blocks",
+    "family": "Concrete masonry",
+    "kerala_relevance": "Very common walling unit in Kerala housing; produced by many local block yards.",
+    "maturity": "Established",
+    "assembly": {
+     "layers": [
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      },
+      {
+       "ref": "solid_concrete_block_2427",
+       "t_mm": 200
+      },
+      {
+       "ref": "cement_plaster",
+       "t_mm": 12
+      }
+     ],
+     "note": "ENS Table 46 'solid concrete block 25/50' 2427 kg/m3 (k 1.396). Local block-yard density and strength vary widely; test per IS 2185."
+    },
+    "properties": {
+     "core_density": {
+      "value": 2427,
+      "unit": "kg/m3",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S01",
+      "locator": "Table 46 #7"
+     },
+     "gwp": {
+      "status": "missing",
+      "grade": "D",
+      "note": "No cited carbon factor for Indian solid concrete blocks."
+     }
+    },
+    "rating_notes": [
+     "GRIHA 19.1.3 accepts solid concrete blocks only with >= 40% fly ash by weight."
+    ],
+    "eligibility": {
+     "structural": "not_assessed",
+     "fire": "not_assessed",
+     "moisture": "not_assessed"
+    }
    }
   ],
   "unfilled_criteria": {
@@ -1120,6 +1167,61 @@
    "accessed": "2026-11-04",
    "verification": "opened_and_read",
    "note": "7 categories, 64 criteria. States itself to be a proposed research framework, not an official GRIHA/IGBC schedule."
+  },
+  {
+   "id": "S15",
+   "title": "IndiaMART Kerala seller listings (Wayanad AAC; Kasaragod and Ernakulam laterite; Areekode mud interlocking; Kozhikode/Kasaragod interlocking city pages)",
+   "org": "indiamart.com",
+   "type": "price_listing",
+   "url": "https://m.indiamart.com/impcat/laterite-stone.html",
+   "locator": "web-search summaries 2026-11-05; city pages dated Jan-Feb 2026",
+   "accessed": "2026-11-05",
+   "verification": "search_summary_only",
+   "note": "Asking prices from individual sellers; size, grade and delivery terms vary. Pages not opened."
+  },
+  {
+   "id": "S16",
+   "title": "Aerocon AAC blocks product page (BirlaNu / Birla Aerocon)",
+   "org": "birlanu.com",
+   "type": "manufacturer_page",
+   "url": "https://www.birlanu.com/aerocon-aac-blocks",
+   "locator": "search summary 2026-11-05",
+   "accessed": "2026-11-05",
+   "verification": "search_summary_only",
+   "note": "Manufacturer claims: compressive strength >= 4 N/mm2; sound reduction 37-42 dB. Third-party listings show >3 N/mm2 and 551-600 kg/m3."
+  },
+  {
+   "id": "S17",
+   "title": "L&T SuFin AAC block listings (Magicrete, Birla Aerocon, Nova)",
+   "org": "lntsufin.com",
+   "type": "retail_listing",
+   "url": "https://lntsufin.com/product/magicrete-600-mm-200-mm-75-mm-aac-blocks-4-mpa/17317-954",
+   "locator": "search summary 2026-11-05",
+   "accessed": "2026-11-05",
+   "verification": "search_summary_only",
+   "note": "Magicrete: 4 MPa, oven-dry density 550-650 kg/m3, sound resistance about 44 dB; Nova 240 mm: 3-4.5 N/mm2, up to 42 dB."
+  },
+  {
+   "id": "S18",
+   "title": "Wienerberger India Porotherm presentation (HP range)",
+   "org": "Wienerberger India (via SlideShare)",
+   "type": "manufacturer_presentation",
+   "url": "https://es.slideshare.net/SBalagopalSivaprakas/porotherm-bricks-presentationpdf",
+   "locator": "search summary 2026-11-05",
+   "accessed": "2026-11-05",
+   "verification": "search_summary_only",
+   "note": "Porotherm HP 200 (400x200x200): 694 kg/m3, >=3.5 N/mm2, U about 1.0 W/m2K, Rw 46 dB, fire 240 min. Marketing material, not a certified data sheet."
+  },
+  {
+   "id": "S19",
+   "title": "Secondary summaries of IS 1077, IS 12894 and IS 2185 (Part 1) requirements",
+   "org": "core.ac.uk paper; studiomatrx.org; infralens.in code pages",
+   "type": "secondary_standard_summary",
+   "url": "https://core.ac.uk/download/297711905.pdf",
+   "locator": "search summary 2026-11-05",
+   "accessed": "2026-11-05",
+   "verification": "search_summary_only",
+   "note": "Clay brick class 3.5 N/mm2 minimum (IS 1077); fly ash brick 7.5 N/mm2 minimum, 230x110x75 mm, absorption limit reported as 15-20% (IS 12894); hollow block Grade A 3.5 N/mm2, density >= 1500 kg/m3 (IS 2185-1:2005). Sources disagree; check BIS texts."
   }
  ],
  "ratings": {
@@ -2585,8 +2687,544 @@
     "opening_conduction_part": 0.5288461266666666,
     "opening_solar_part": 3.177183356666666,
     "compliant_at_limit": true
+   },
+   "SCB": {
+    "retv": 17.011350881433778,
+    "retv_rounded": 17,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 13.305321398100446,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": false
    }
   },
   "note": "RETV is a whole-envelope code check (ENS 2024 Sec. 9.5). 'retv_if_all_walls_were' swaps every external wall for each candidate to show the effect of the wall alone; windows, shading (ESF) and opaque doors are not optimised. Not a compliance determination."
+ },
+ "market": {
+  "prepared": "2026-11-05",
+  "note": "Indicative prices and product claims (grade C). Not quotations: confirm with dealers before budgeting. Live prices are not fetched by the site; use the search links.",
+  "products": {
+   "AAC": [
+    {
+     "id": "aac-kochi-200",
+     "label": "600 x 200 x 200 mm, Kochi (aggregator)",
+     "city": "Kochi",
+     "l_mm": 600,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 83,
+     "price_range": [
+      64,
+      102
+     ],
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Default. Thin-bed joint taken as 0 mm.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "aac-tvm-200",
+     "label": "600 x 200 x 200 mm, Thiruvananthapuram (aggregator)",
+     "city": "Thiruvananthapuram",
+     "l_mm": 600,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 84,
+     "price_range": [
+      64,
+      104
+     ],
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "",
+     "priced_per": "piece"
+    },
+    {
+     "id": "aac-wayanad-200",
+     "label": "600 x 200 x 200 mm, Wayanad seller",
+     "city": "Wayanad",
+     "l_mm": 600,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 80,
+     "price_range": null,
+     "source": "S15",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Single seller asking price.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "aac-kochi-150",
+     "label": "600 x 200 x 150 mm (no Kerala price found)",
+     "city": "Kochi",
+     "l_mm": 600,
+     "h_mm": 200,
+     "t_mm": 150,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": null,
+     "price_range": null,
+     "source": "S11",
+     "grade": "D",
+     "status": "missing",
+     "date": "2026",
+     "note": "Thinner wall: U-value and carbon recalculated; price missing.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "aac-kochi-100",
+     "label": "600 x 200 x 100 mm Siporex, Kochi (aggregator)",
+     "city": "Kochi",
+     "l_mm": 600,
+     "h_mm": 200,
+     "t_mm": 100,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 53,
+     "price_range": [
+      42,
+      64
+     ],
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "100 mm is normally a partition thickness; shown for comparison.",
+     "priced_per": "piece"
+    }
+   ],
+   "BRICK": [
+    {
+     "id": "brick-kochi",
+     "label": "9 x 4 x 3 in (229 x 102 x 76 mm), Kochi (aggregator)",
+     "city": "Kochi",
+     "l_mm": 228.6,
+     "h_mm": 76.2,
+     "t_mm": 230,
+     "joint_mm": 10,
+     "wythes": 2,
+     "price_inr": 15,
+     "price_range": [
+      13,
+      17
+     ],
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Default. 230 mm wall = two stretcher wythes, 10 mm joints.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "brick-tvm",
+     "label": "9 x 4 x 3 in, Thiruvananthapuram (aggregator)",
+     "city": "Thiruvananthapuram",
+     "l_mm": 228.6,
+     "h_mm": 76.2,
+     "t_mm": 230,
+     "joint_mm": 10,
+     "wythes": 2,
+     "price_inr": 15,
+     "price_range": [
+      13,
+      17
+     ],
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "",
+     "priced_per": "piece"
+    }
+   ],
+   "FAB": [
+    {
+     "id": "fab-tvm",
+     "label": "230 x 110 x 75 mm, Thiruvananthapuram (aggregator)",
+     "city": "Thiruvananthapuram",
+     "l_mm": 230,
+     "h_mm": 75,
+     "t_mm": 230,
+     "joint_mm": 10,
+     "wythes": 2,
+     "price_inr": 7,
+     "price_range": [
+      6,
+      8
+     ],
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Size from secondary IS 12894 summary (S19); 230 mm wall = two wythes.",
+     "priced_per": "piece"
+    }
+   ],
+   "HCB": [
+    {
+     "id": "hcb-tvm-200",
+     "label": "400 x 200 x 200 mm, Thiruvananthapuram (aggregator)",
+     "city": "Thiruvananthapuram",
+     "l_mm": 400,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 50,
+     "price_range": null,
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Default. No cited conductivity for hollow blocks, so no U-value.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "hcb-thrissur-200",
+     "label": "400 x 200 x 200 mm, Thrissur (aggregator)",
+     "city": "Thrissur",
+     "l_mm": 400,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 48,
+     "price_range": null,
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "",
+     "priced_per": "piece"
+    }
+   ],
+   "SCB": [
+    {
+     "id": "scb-kochi-200",
+     "label": "400 x 200 x 200 mm, Kochi (aggregator)",
+     "city": "Kochi",
+     "l_mm": 400,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 55,
+     "price_range": null,
+     "source": "S11",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Default. Joint not stated; taken as 0 mm, which under-counts mortar.",
+     "priced_per": "piece"
+    }
+   ],
+   "CSEB": [
+    {
+     "id": "cseb-none",
+     "label": "230 mm wall, no price selected",
+     "city": "-",
+     "l_mm": 228.6,
+     "h_mm": 114.3,
+     "t_mm": 230,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": null,
+     "price_range": null,
+     "source": "S15",
+     "grade": "D",
+     "status": "missing",
+     "date": "2026",
+     "note": "Default: keeps the published (unpriced) dataset.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "cseb-interlock-9x9x45",
+     "label": "Interlocking 9 x 9 x 4.5 in block (seller, location not stated)",
+     "city": "India",
+     "l_mm": 228.6,
+     "h_mm": 114.3,
+     "t_mm": 230,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 48,
+     "price_range": null,
+     "source": "S15",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Dry-stacked interlocking; joint 0 mm. Location of seller not stated in the listing.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "cseb-interlock-9x9x3",
+     "label": "9 x 9 x 3 in CSEB (TradeIndia seller)",
+     "city": "India",
+     "l_mm": 228.6,
+     "h_mm": 76.2,
+     "t_mm": 230,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 32,
+     "price_range": null,
+     "source": "S15",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Seller listing; location not stated.",
+     "priced_per": "piece"
+    }
+   ],
+   "LAT": [
+    {
+     "id": "lat-none",
+     "label": "Laterite, no price selected",
+     "city": "-",
+     "l_mm": 355.6,
+     "h_mm": 177.8,
+     "t_mm": 228.6,
+     "joint_mm": 10,
+     "wythes": 1,
+     "price_inr": null,
+     "price_range": null,
+     "source": "S15",
+     "grade": "D",
+     "status": "missing",
+     "date": "2026",
+     "note": "Default.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "lat-14x9x7",
+     "label": "14 x 9 x 7 in dressed block (listing, location not stated)",
+     "city": "India",
+     "l_mm": 355.6,
+     "h_mm": 177.8,
+     "t_mm": 228.6,
+     "joint_mm": 10,
+     "wythes": 1,
+     "price_inr": 120,
+     "price_range": null,
+     "source": "S15",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Laid 14 in long, 7 in high; 9 in wall. No cited conductivity, so no U-value.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "lat-kasaragod-normal",
+     "label": "Normal laterite stone, Kasaragod seller (size not stated)",
+     "city": "Kasaragod",
+     "l_mm": null,
+     "h_mm": null,
+     "t_mm": null,
+     "joint_mm": 10,
+     "wythes": 1,
+     "price_inr": 40,
+     "price_range": null,
+     "source": "S15",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Size missing: cost per m2 cannot be computed.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "lat-ernakulam",
+     "label": "Red laterite block, Ernakulam seller (size not stated)",
+     "city": "Ernakulam",
+     "l_mm": null,
+     "h_mm": null,
+     "t_mm": null,
+     "joint_mm": 10,
+     "wythes": 1,
+     "price_inr": 90,
+     "price_range": null,
+     "source": "S15",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Size missing: cost per m2 cannot be computed.",
+     "priced_per": "piece"
+    }
+   ],
+   "CLC": [
+    {
+     "id": "clc-none",
+     "label": "600 x 200 x 200 mm (no Kerala price found)",
+     "city": "-",
+     "l_mm": 600,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": null,
+     "price_range": null,
+     "source": "S15",
+     "grade": "D",
+     "status": "missing",
+     "date": "2026",
+     "note": "IndiaMART CLC listings found were outside Kerala (Chennai ₹45, Bobbili ₹40, sizes not confirmed).",
+     "priced_per": "piece"
+    }
+   ]
+  },
+  "properties": {
+   "AAC": {
+    "density_kg_m3": {
+     "range": [
+      550,
+      650
+     ],
+     "source": "S17",
+     "grade": "C"
+    },
+    "compressive_n_mm2": {
+     "range": [
+      3,
+      4.5
+     ],
+     "source": "S16",
+     "grade": "C",
+     "note": "Birla Aerocon claims >= 4; listings show >3 and 3-4.5."
+    },
+    "sound_db": {
+     "range": [
+      37,
+      45
+     ],
+     "source": "S16",
+     "grade": "C",
+     "note": "Manufacturer sound reduction claims (Birla 37-42 dB, Magicrete about 44 dB); test standard and thickness not stated."
+    },
+    "water_absorption_pct": {
+     "status": "conflicting",
+     "note": "Secondary sources give <=10% and <=25% for IS 2185-3; not used."
+    },
+    "standard": "IS 2185 (Part 3)"
+   },
+   "BRICK": {
+    "compressive_n_mm2": {
+     "min": 3.5,
+     "source": "S19",
+     "grade": "C",
+     "note": "IS 1077 lowest class (secondary summary); local country-fired bricks vary widely."
+    },
+    "water_absorption_pct": {
+     "max": 20,
+     "source": "S19",
+     "grade": "C"
+    },
+    "standard": "IS 1077"
+   },
+   "FAB": {
+    "compressive_n_mm2": {
+     "min": 7.5,
+     "source": "S19",
+     "grade": "C"
+    },
+    "water_absorption_pct": {
+     "range": [
+      15,
+      20
+     ],
+     "source": "S19",
+     "grade": "C",
+     "note": "Limit reported differently by sources."
+    },
+    "standard": "IS 12894"
+   },
+   "HCB": {
+    "compressive_n_mm2": {
+     "min": 3.5,
+     "source": "S19",
+     "grade": "C",
+     "note": "IS 2185-1:2005 Grade A load-bearing (secondary summary)."
+    },
+    "density_kg_m3": {
+     "min": 1500,
+     "source": "S19",
+     "grade": "C"
+    },
+    "standard": "IS 2185 (Part 1)"
+   },
+   "SCB": {
+    "standard": "IS 2185 (Part 1)",
+    "note": "No product test data collected."
+   },
+   "PCB": {
+    "density_kg_m3": {
+     "value": 694,
+     "source": "S18",
+     "grade": "C",
+     "note": "Porotherm HP 200; the platform's U-value uses the ENS 1520 kg/m3 hollow-brick row instead."
+    },
+    "compressive_n_mm2": {
+     "min": 3.5,
+     "source": "S18",
+     "grade": "C"
+    },
+    "sound_db": {
+     "value": 46,
+     "source": "S18",
+     "grade": "C",
+     "note": "Rw, manufacturer presentation."
+    },
+    "fire_min": {
+     "value": 240,
+     "source": "S18",
+     "grade": "C"
+    },
+    "standard": "IS 3952"
+   },
+   "CSEB": {
+    "standard": "IS 1725",
+    "note": "No strength or absorption data collected; Kerala listings do not state test results."
+   },
+   "LAT": {
+    "standard": "IS 3620",
+    "note": "Kerala laterite strength and absorption vary by quarry; a secondary presentation reports 10-18% absorption (not used)."
+   },
+   "CLC": {
+    "note": "No Kerala product data collected."
+   }
+  },
+  "search": {
+   "cities": [
+    "Kollam",
+    "Kochi",
+    "Thiruvananthapuram"
+   ],
+   "queries": {
+    "AAC": "aac block",
+    "BRICK": "red clay brick",
+    "FAB": "fly ash brick",
+    "HCB": "hollow concrete block",
+    "SCB": "solid concrete block",
+    "CSEB": "interlocking mud block",
+    "LAT": "laterite stone",
+    "CLC": "clc block",
+    "PCB": "porotherm clay block",
+    "GEO": "geopolymer block",
+    "RAB": "recycled aggregate block",
+    "SAND": "eps panel",
+    "BRKCOIR": "coir board",
+    "SAND_CLC": "clc block"
+   },
+   "url_template": "https://dir.indiamart.com/search.mp?ss={q}+{city}"
+  }
  }
 }
