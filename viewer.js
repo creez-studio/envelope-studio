@@ -55,7 +55,7 @@ export class ModelViewer {
       const f = this.controls.target.clone().sub(this.camera.position);
       const rot = (-this.tn) - (Math.atan2(f.x, -f.z) * 180 / Math.PI);
       this.compass.firstChild.style.transform = `rotate(${rot}deg)`;
-      this.renderer.render(this.scene, this.camera); requestAnimationFrame(loop);
+      this.renderer.render(this.scene, this.camera); this._placeLabels(); requestAnimationFrame(loop);
     };
     loop();
     new ResizeObserver(() => { const W = this.el.clientWidth, H = this.el.clientHeight; if (!W || !H) return; this.camera.aspect = W / H; this.camera.updateProjectionMatrix(); this.renderer.setSize(W, H); }).observe(this.el);
@@ -151,6 +151,40 @@ export class ModelViewer {
   recolor(uFn) {
     if (!this.group) return;
     for (const c of this.group.children) if (c.userData && c.userData.wall) c.material.color.set(uColor(uFn(c.userData.wall)));
+  }
+
+  /** Recolour walls with any colour function and optionally glow one wall (e.g. the most heated). */
+  recolorWith(colorFn, glowId = null) {
+    if (!this.group) return;
+    for (const c of this.group.children) if (c.userData && c.userData.wall) {
+      c.material.color.set(colorFn(c.userData.wall));
+      if (c.material.emissive) c.material.emissive.set(c.userData.wall.id === glowId ? 0x6b2a00 : 0x000000);
+    }
+  }
+
+  /** Floating labels over walls: items [{wallId, html, hot}] (projected every frame). */
+  setLabels(items) {
+    const THREE = T;
+    if (!this.labelLayer) { this.labelLayer = document.createElement("div"); this.labelLayer.className = "wall-labels"; this.el.appendChild(this.labelLayer); }
+    this.labelLayer.replaceChildren();
+    this.labels = [];
+    for (const it of items) {
+      const mesh = this.group.children.find(c => c.userData?.wall?.id === it.wallId);
+      if (!mesh) continue;
+      mesh.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(mesh), c = box.getCenter(new THREE.Vector3()); c.y = box.max.y + 0.4;
+      const d = document.createElement("div"); d.className = "wall-label" + (it.hot ? " hot" : ""); d.innerHTML = it.html;
+      this.labelLayer.appendChild(d); this.labels.push({ el: d, pos: c });
+    }
+  }
+  _placeLabels() {
+    if (!this.labels?.length) return;
+    const W = this.el.clientWidth, H = this.el.clientHeight;
+    for (const l of this.labels) {
+      const v = l.pos.clone().project(this.camera);
+      l.el.style.display = v.z > 1 ? "none" : "";
+      l.el.style.transform = `translate(${(v.x * 0.5 + 0.5) * W}px, ${(-v.y * 0.5 + 0.5) * H}px) translate(-50%, -100%)`;
+    }
   }
 
   /** Place the sun: true azimuth (deg clockwise from true north) and altitude (deg). Shadows follow. */

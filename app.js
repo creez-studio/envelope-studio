@@ -4,7 +4,7 @@ import * as E from "./engine.js";
 import * as X from "./explain.js";
 import * as B from "./bim.js";
 import * as C from "./charts.js";
-import { ModelViewer, RAMP_STOPS } from "./viewer.js";
+import { ModelViewer, RAMP_STOPS, uColor as uColorOf } from "./viewer.js";
 import * as SOL from "./solar.js";
 import * as ST from "./studio.js";
 
@@ -37,7 +37,7 @@ const S = Object.assign({
   preset: "balanced", weights: { ...BASE }, grade: "C", comp: 0.5, retvGate: false, budget: null, tU: null, tRetv: null, ifcProject: null, ifcName: null,
 }, (() => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; } })());
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* storage unavailable or full: ignore */ } };
-S.choices ||= {}; S.studio ||= "AAC"; S.applyAll ??= false; S.sunMonth ??= new Date().getMonth(); S.sunHour ??= 10; S.sunNow ??= false; S.facade ||= "W";
+S.choices ||= {}; S.whMode ||= "now"; S.absorb ??= 0.6; S.studio ||= "AAC"; S.applyAll ??= false; S.sunMonth ??= new Date().getMonth(); S.sunHour ??= 10; S.sunNow ??= false; S.facade ||= "W";
 if (!db0.candidates.some(c => c.id === S.studio)) S.studio = "AAC";
 refreshData();
 let ifcBytes = null, sampleProject = D.sample_project, viewer = null, lastRes = null, lastProject = null, BACKEND = null;
@@ -117,11 +117,32 @@ function modelFacts(p) {
     <dt>RETV as modelled</dt><dd>${p.retv_as_modelled ? f(p.retv_as_modelled.retv, 2) + " W/m²" : "not available"}</dd></dl>` +
     (p.warnings || []).map(w => `<div class="note">${esc(w)}</div>`).join("");
 }
-async function readIfc(file) {
-  if (/\.(rvt|rfa|rte)$/i.test(file.name)) {
-    $("v-status").innerHTML = `<b>${esc(file.name)}</b> is a native Revit file, which cannot be read outside Revit. Export it as IFC (open "Exporting from Revit" above) and upload the .ifc.`;
-    const d = document.querySelector(".ifc-help"); if (d) d.open = true; return;
+// Revit files: read only what is stored openly (build string, worksharing flag, embedded preview); geometry needs an IFC export.
+async function readRevit(file) {
+  const b = new Uint8Array(await file.arrayBuffer());
+  const isOle = b[0] === 0xd0 && b[1] === 0xcf && b[2] === 0x11 && b[3] === 0xe0;
+  const txt = new TextDecoder("utf-16le").decode(b.subarray(0, Math.min(b.length, 2_000_000)));
+  const ver = (txt.match(/Autodesk Revit[^\u0000\r\n]{0,40}?\d{4}/) || [])[0] || null;
+  const build = (txt.match(/Build: ?(\d{8}_\d{4})/) || [])[1] || null;
+  const ws = (txt.match(/Worksharing: ?([^\u0000\r\n]{0,20})/) || [])[1] || null;
+  let img = null;
+  const sig = [0x89, 0x50, 0x4e, 0x47];
+  for (let i = 0; i < Math.min(b.length, 4_000_000) - 8; i++) if (b[i] === sig[0] && b[i + 1] === sig[1] && b[i + 2] === sig[2] && b[i + 3] === sig[3]) {
+    for (let j = i; j < Math.min(b.length, i + 2_000_000); j++) if (b[j] === 0x49 && b[j + 1] === 0x45 && b[j + 2] === 0x4e && b[j + 3] === 0x44) { img = URL.createObjectURL(new Blob([b.subarray(i, j + 8)], { type: "image/png" })); break; }
+    break;
   }
+  S.src = "ifc"; srcBtns.forEach(x => x.classList.toggle("on", x.dataset.v === "ifc"));
+  $("m-side").querySelector(".revit-card")?.remove();
+  const card = document.createElement("div"); card.className = "ifc-help revit-card";
+  card.innerHTML = `<b>${esc(file.name)}</b> (${(file.size / 1048576).toFixed(1)} MB)${img ? `<img src="${img}" alt="Revit preview" style="display:block;width:128px;height:128px;margin:8px 0;border:1px solid var(--line);border-radius:8px;background:#fff;image-rendering:pixelated">` : ""}
+    <dl class="kv"><dt>Format</dt><dd>${isOle ? "Revit project (OLE container)" : "not a recognised Revit file"}</dd><dt>Saved with</dt><dd>${esc(ver || "unknown")}${build ? ` (build ${esc(build)})` : ""}</dd><dt>Worksharing</dt><dd>${esc(ws || "unknown")}</dd></dl>
+    <p style="margin:8px 0 0">Walls, layers and windows inside a .rvt can only be read by Revit itself. Open it in Revit ${ver && /20\d\d/.test(ver) ? (ver.match(/20\d\d/)[0]) + " or newer" : ""} (Windows; a college lab PC works), set <i>Manage → Location</i> and the true north, then <i>File → Export → IFC</i> (IFC4 Reference View, tick <i>Export base quantities</i>), and drop the .ifc here. Everything below then fills in automatically.</p>`;
+  $("m-side").prepend(card);
+  const d = document.querySelector(".ifc-help:not(.revit-card)"); if (d) d.open = true;
+  $("v-status").textContent = `Read the Revit file's header only. Export it as IFC to analyse its walls.`;
+}
+async function readIfc(file) {
+  if (/\.(rvt|rfa|rte)$/i.test(file.name)) { await readRevit(file); return; }
   $("v-status").textContent = "Reading " + file.name + "…";
   try {
     const buf = await file.arrayBuffer();
@@ -375,6 +396,7 @@ document.addEventListener("click", e => { const el = e.target.closest?.("svg.cha
 // ------------------------------------------------------------ viewer paint + sun study
 function paintViewer() {
   if (!viewer) return;
+  if (S.whMode !== "u" && S.src !== "manual") { renderWallHeat(); return; }
   const u = S.applyAll && derived[S.studio]?.u_value ? derived[S.studio].u_value.value : null;
   viewer.recolor(w => (u != null && w.external !== false) ? u : w.u_value);
 }
@@ -391,10 +413,83 @@ function sunStudy() {
   if (S.sunNow) { s = SOL.sunAt(new Date(), lat, lon); label = `now (solar ${f(s.solarTime, 2)} h)`; }
   else { const n = SOL.AVG_DAY[S.sunMonth]; s = SOL.sunFromHourAngle(lat, SOL.declination(n), 15 * (S.sunHour - 12));
     const ist = SOL.istFromSolar(S.sunHour, n, lon); label = `${SOL.MONTHS[S.sunMonth]} average day, ${Math.floor(S.sunHour)}:${String(Math.round((S.sunHour % 1) * 60)).padStart(2, "0")} solar ≈ ${Math.floor(ist)}:${String(Math.round((ist % 1) * 60) % 60).padStart(2, "0")} IST`; }
-  $("sun-hv").textContent = f(S.sunHour, 2).replace(/\.00$/, ":00");
+  $("sun-hv").textContent = `${Math.floor(S.sunHour)}:${String(Math.round((S.sunHour % 1) * 60)).padStart(2, "0")}`;
   $("sun-txt").textContent = `${label} · altitude ${f(s.altitude, 1)}°, azimuth ${f(s.azimuth, 0)}°${s.altitude <= 0 ? " (below horizon)" : ""}`;
   viewer?.setSun(s.azimuth, s.altitude);
+  lastSunNow = S.sunNow ? s : null;
+  renderWallHeat();
   return s;
+}
+
+// ------------------------------------------------------------ wall heat analysis (per BIM wall, exact azimuth)
+let lastSunNow = null, solarCache = { key: null, val: null }, playTimer = null;
+const HEAT = ["#fde4d6", "#f9c4a6", "#f4a274", "#eb6834", "#c9531f", "#9c3f15", "#6e2b0c"];   // single-hue orange ramp for solar heat
+const heatColor = (v, hi) => HEAT[Math.max(0, Math.min(HEAT.length - 1, Math.floor((v / (hi || 1)) * HEAT.length)))];
+$("wh-mode").value = S.whMode; $("wh-abs").value = String(S.absorb);
+$("wh-mode").onchange = e => { S.whMode = e.target.value; save(); paintViewer(); renderWallHeat(); };
+$("wh-abs").onchange = e => { S.absorb = +e.target.value; save(); renderWallHeat(); };
+$("wh-play").onclick = () => {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; $("wh-play").textContent = "▶ Play the day"; return; }
+  S.sunNow = false; $("sun-now").checked = false; if (S.whMode === "u" || S.whMode === "year") { S.whMode = "now"; $("wh-mode").value = "now"; }
+  $("wh-play").textContent = "❚❚ Pause";
+  playTimer = setInterval(() => { S.sunHour = S.sunHour >= 18 ? 6 : S.sunHour + 0.25; $("sun-h").value = S.sunHour; sunStudy(); }, 180);
+};
+function wallsForHeat() {
+  const p = lastProject || currentProject();
+  const u = S.applyAll && derived[S.studio]?.u_value ? derived[S.studio].u_value.value : null;
+  return p.walls.filter(w => w.external && w.area_m2 != null).map(w => ({ ...w, u_eff: u ?? w.u_value ?? (derived[S.studio]?.u_value?.value ?? null) }));
+}
+function computeWallSolar(walls) {
+  const lat = siteLat(), key = [lat.toFixed(3), S.city, walls.map(w => w.id + ":" + (w.azimuth_deg ?? w.orientation) + ":" + w.area_m2).join("|")].join("/");
+  if (solarCache.key !== key) solarCache = { key, val: SOL.wallSolar(lat, cities[S.city].monthly.ALLSKY_SFC_SW_DWN, walls) };
+  return solarCache.val;
+}
+function renderWallHeat() {
+  const walls = wallsForHeat();
+  if (!walls.length) { $("wh-tiles").innerHTML = "<p class='mut'>Needs a model or facade areas.</p>"; $("wh-now").innerHTML = $("wh-year").innerHTML = $("wh-table").innerHTML = ""; return; }
+  const { F, per } = computeWallSolar(walls);
+  const m = lastSunNow ? new Date().getMonth() : S.sunMonth;
+  const hourIdx = Math.max(0, Math.min(23, Math.floor(lastSunNow ? lastSunNow.solarTime : S.sunHour)));
+  const rows = per.map(x => {
+    const I = F[m].hourly[x.key][hourIdx], day = F[m].daily[x.key];
+    const q = x.wall.u_eff != null ? SOL.solarHeatFlux(x.wall.u_eff, S.absorb, I) : null;
+    const peakH = F[m].hourly[x.key].indexOf(Math.max(...F[m].hourly[x.key]));
+    return { ...x, I, day, q, qWall: q != null ? q * x.wall.area_m2 : null, peakH };
+  });
+  const maxBy = k => rows.reduce((a, b) => (b[k] ?? -1) > (a[k] ?? -1) ? b : a);
+  const hotNow = maxBy("I"), hotMonth = maxBy("day"), hotYear = maxBy("annual_kwh_m2"), mostEnergy = maxBy("annual_kwh");
+  const lbl = r => `${r.wall.name} (${r.wall.orientation}${r.azimuth != null ? ", " + Math.round(r.azimuth) + "°" : ""})`;
+  const timeTxt = lastSunNow ? "now" : `${SOL.MONTHS[m]}, ${hourIdx}:00–${hourIdx + 1}:00 solar time`;
+  $("wh-sub").textContent = `Per wall, using each wall's own compass direction from the model. Shown for ${timeTxt}; change the month or solar time in the sun study above, or press play.`;
+  $("wh-tiles").innerHTML =
+    `<div class="card tile"><p class="k">Most sun right now</p><p class="v" style="font-size:1.25rem">${hotNow.I > 1 ? esc(lbl(hotNow)) : "no direct sun"}</p><p class="d">${hotNow.I > 1 ? `${Math.round(hotNow.I)} W/m² on the wall${hotNow.q != null ? ` · about ${f(hotNow.q, 1)} W/m² into the room (${Math.round(hotNow.qWall)} W for the wall)` : ""}` : "sun below the horizon or behind every wall"}</p></div>` +
+    `<div class="card tile"><p class="k">Most heated wall in ${SOL.MONTHS[m]}</p><p class="v" style="font-size:1.25rem">${esc(lbl(hotMonth))}</p><p class="d">${f(hotMonth.day, 2)} kWh/m² per day, peak around ${hotMonth.peakH}:00–${hotMonth.peakH + 1}:00 solar</p></div>` +
+    `<div class="card tile"><p class="k">Most heated over the year</p><p class="v" style="font-size:1.25rem">${esc(lbl(hotYear))}</p><p class="d">${Math.round(hotYear.annual_kwh_m2)} kWh/m² a year${mostEnergy.wall.id !== hotYear.wall.id ? ` · largest total on one wall: ${esc(mostEnergy.wall.name)} (${Math.round(mostEnergy.annual_kwh).toLocaleString("en-IN")} kWh, bigger area)` : ` · ${Math.round(hotYear.annual_kwh).toLocaleString("en-IN")} kWh on the whole wall`}</p></div>`;
+  const hiNow = Math.max(1, ...F.flatMap(mm => per.map(x => Math.max(...mm.hourly[x.key]))));
+  $("wh-now").innerHTML = C.rankedBars(rows.slice().sort((a, b) => b.I - a.I).map(r => ({ label: r.wall.name + " · " + r.wall.orientation, value: r.I, tipLabel: lbl(r) + (r.q != null ? ` · ≈${f(r.q, 1)} W/m² into room` : "") })), { unit: "W/m²", decimals: 0, max: Math.ceil(hiNow / 100) * 100, width: W("wh-now"), title: "solar now per wall" });
+  $("wh-year").innerHTML = C.rankedBars(rows.slice().sort((a, b) => b.annual_kwh_m2 - a.annual_kwh_m2).map(r => ({ label: r.wall.name + " · " + r.wall.orientation, value: r.annual_kwh_m2, tipLabel: `${lbl(r)} · ${Math.round(r.annual_kwh).toLocaleString("en-IN")} kWh on ${f(r.wall.area_m2, 1)} m²` })), { unit: "kWh/m²·yr", decimals: 0, width: W("wh-year"), title: "annual solar per wall" });
+  $("wh-table").innerHTML = `<table><tr><th>Wall</th><th>Facing</th><th class="num">Area m²</th><th class="num">U</th><th class="num">Solar now W/m²</th><th class="num">Into room now W/m²</th><th class="num">${SOL.MONTHS[m]} kWh/m²·day</th><th class="num">Year kWh/m²</th><th class="num">Year kWh (wall)</th></tr>` +
+    rows.map(r => `<tr${r === hotYear ? ' style="background:var(--warn-wash)"' : ""}><td>${esc(r.wall.name)}</td><td>${r.wall.orientation}${r.azimuth != null ? ` <span class="small mut">${Math.round(r.azimuth)}°</span>` : ""}</td><td class="num">${f(r.wall.area_m2, 1)}</td><td class="num">${r.wall.u_eff != null ? f(r.wall.u_eff) : "–"}</td><td class="num">${Math.round(r.I)}</td><td class="num">${r.q != null ? f(r.q, 1) : "–"}</td><td class="num">${f(r.day, 2)}</td><td class="num">${Math.round(r.annual_kwh_m2)}</td><td class="num">${Math.round(r.annual_kwh).toLocaleString("en-IN")}</td></tr>`).join("") + `</table>`;
+  // 3D colours
+  if (viewer && S.whMode !== "u") {
+    const byId = Object.fromEntries(rows.map(r => [r.wall.id, r]));
+    const val = r => S.whMode === "now" ? r.I : S.whMode === "month" ? r.day : r.annual_kwh_m2;
+    const hi = S.whMode === "now" ? hiNow : Math.max(...rows.map(val));
+    const glow = S.whMode === "now" ? (hotNow.I > 1 ? hotNow.wall.id : null) : S.whMode === "month" ? hotMonth.wall.id : hotYear.wall.id;
+    viewer.recolorWith(w => byId[w.id] ? heatColor(val(byId[w.id]), hi) : "#b9b8b0", glow);
+    const unit = S.whMode === "now" ? "W/m²" : S.whMode === "month" ? "kWh/m²·day" : "kWh/m²·yr";
+    viewer.setLabels(rows.map(r => ({ wallId: r.wall.id, hot: r.wall.id === glow, html: `<b>${esc(r.wall.orientation)}</b> ${S.whMode === "now" ? Math.round(r.I) : S.whMode === "month" ? f(r.day, 2) : Math.round(r.annual_kwh_m2)} ${unit}${r.wall.id === glow ? " ▲" : ""}` })));
+    $("v-status").textContent = `Walls are coloured by ${S.whMode === "now" ? "solar radiation at the chosen time" : S.whMode === "month" ? "daily solar this month" : "annual solar"}; ▲ marks the most heated wall. The compass shows true north; shadows follow the sun study.`;
+    $("ramp").innerHTML = HEAT.map(c => `<i style="background:${c}"></i>`).join("");
+    $("ramp").parentElement.querySelector("span").textContent = S.whMode === "now" ? "Solar now" : S.whMode === "month" ? "Solar, month" : "Solar, year";
+    $("ramp").parentElement.lastElementChild.textContent = `0 → ${Math.round(hi)} ${S.whMode === "now" ? "W/m²" : S.whMode === "month" ? "kWh/m²·day" : "kWh/m²·yr"}`;
+  } else if (viewer) {
+    $("ramp").innerHTML = RAMP_STOPS.map(c => `<i style="background:${c}"></i>`).join("");
+    $("ramp").parentElement.querySelector("span").textContent = "U-value"; $("ramp").parentElement.lastElementChild.textContent = "0 → 2.5+ W/m²K";
+    const u = S.applyAll && derived[S.studio]?.u_value ? derived[S.studio].u_value.value : null;
+    viewer.recolorWith(w => uColorOf(u != null && w.external !== false ? u : w.u_value));
+    viewer.setLabels(walls.map(w => ({ wallId: w.id, html: `<b>${esc(w.orientation)}</b> U ${w.u_eff != null ? f(w.u_eff) : "–"}` })));
+  }
 }
 
 // ------------------------------------------------------------ sun & solar charts

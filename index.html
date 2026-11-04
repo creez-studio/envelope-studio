@@ -64,7 +64,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-vis
 .choice button.on{border-color:var(--acc);background:var(--acc-wash);box-shadow:inset 0 0 0 1px var(--acc)}
 .btn{border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 14px;font:inherit;font-size:.88rem;cursor:pointer}
 .btn.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
-.drop{border:1.5px dashed var(--line-2);border-radius:12px;padding:18px;text-align:center;color:var(--ink-2);cursor:pointer;background:var(--surface-2)}
+.drop{display:block;border:1.5px dashed var(--line-2);border-radius:12px;padding:18px;text-align:center;color:var(--ink-2);cursor:pointer;background:var(--surface-2)}
 .drop.over{border-color:var(--acc);background:var(--acc-wash)}
 .tile .k{font-size:.78rem;color:var(--muted);margin:0}.tile .v{font-size:1.9rem;font-weight:600;letter-spacing:-.02em;margin:2px 0 0;line-height:1.15}.tile .d{font-size:.8rem;color:var(--ink-2);margin:4px 0 0}
 .tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line-2);color:var(--ink-2);margin-right:4px;white-space:nowrap}
@@ -97,6 +97,9 @@ svg .mark{cursor:default;transition:opacity .12s}svg .mark:hover,svg .mark:focus
 .site-pin{width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--acc);border:3px solid #fff;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.3)}
 .compass{position:absolute;right:10px;top:10px;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.12))}
 .compass svg{transition:transform .05s linear}
+.wall-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.wall-label{position:absolute;left:0;top:0;background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:3px 7px;font-size:.72rem;line-height:1.25;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12);color:var(--ink)}
+.wall-label b{font-size:.8rem}.wall-label.hot{border-color:#c9531f;box-shadow:0 0 0 2px rgba(235,104,52,.35)}
 .sunbar{margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);gap:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips button{border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:6px 12px;font:inherit;font-size:.84rem;cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
@@ -176,6 +179,20 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:24px 16px}
       <p class="small mut" id="v-status" style="margin:8px 0 0"></p>
     </div>
     <div class="card" id="m-side"></div>
+  </div>
+  <div class="card" style="margin-top:14px" id="wh-card">
+    <div class="row" style="justify-content:space-between"><div><h3>Wall heat analysis</h3><p class="sub" id="wh-sub"></p></div>
+      <div class="row">
+        <label class="small">3D colours <select id="wh-mode" style="width:auto"><option value="now">Solar on walls at this time</option><option value="month">Daily solar, this month</option><option value="year">Annual solar</option><option value="u">U-value</option></select></label>
+        <label class="small">Outer finish <select id="wh-abs" style="width:auto"><option value="0.3">Light (absorptance 0.3)</option><option value="0.6">Medium (0.6)</option><option value="0.9">Dark (0.9)</option></select></label>
+        <button class="btn" id="wh-play">▶ Play the day</button></div></div>
+    <div class="grid g3" id="wh-tiles"></div>
+    <div class="grid g2" style="margin-top:12px">
+      <div><h3 style="font-size:.92rem">At this month and time (W/m²)</h3><div id="wh-now"></div></div>
+      <div><h3 style="font-size:.92rem">Over the whole year (kWh per m² of wall)</h3><div id="wh-year"></div></div>
+    </div>
+    <div class="scroll" id="wh-table" style="margin-top:8px"></div>
+    <p class="small mut">Incident solar from the monthly-average-day method (NASA POWER radiation, isotropic sky, no shading by neighbours or overhangs). Heat into the room = U × absorptance × solar × 0.04 m²K/W (ENS outside surface resistance), a steady-state sol-air estimate: heavy walls delay it by their time lag and damp it by their decrement factor.</p>
   </div>
   <div class="card" style="margin-top:14px"><h3>Walls read from the model</h3><p class="sub">Materials are mapped to ENS 2024 Table 46 by name; unmapped layers are never guessed.</p><div class="scroll" id="m-walls"></div></div>
 

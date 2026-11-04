@@ -47,7 +47,8 @@ export function sunPath(lat, n, step = 0.5) {
 /** Monthly-average-day irradiance on vertical facades.
  *  ghiKwh: 12 monthly mean daily GHI values (kWh/m2/day). Returns per month: daily totals by orientation (kWh/m2/day),
  *  hourly incident W/m2 by orientation (24 values), clearness index, diffuse fraction. */
-export function facadeIrradiance(lat, ghiKwh, { albedo = 0.2 } = {}) {
+export function facadeIrradiance(lat, ghiKwh, { albedo = 0.2, extra = {} } = {}) {
+  const DIRS = [...ORIENTS, ...Object.entries(extra)];   // extra: {key: azimuth deg clockwise from true north}, e.g. one per BIM wall
   const Gsc = 1367, p = lat * D2R, out = [];
   for (let m = 0; m < 12; m++) {
     const n = AVG_DAY[m], dec = declination(n), d = dec * D2R;
@@ -59,7 +60,7 @@ export function facadeIrradiance(lat, ghiKwh, { albedo = 0.2 } = {}) {
     const Hd = fd * H;
     const a = 0.409 + 0.5016 * Math.sin(wsr - Math.PI / 3), b = 0.6609 - 0.4767 * Math.sin(wsr - Math.PI / 3);
     const den = Math.sin(wsr) - wsr * Math.cos(wsr);
-    const hourly = Object.fromEntries(ORIENTS.map(([o]) => [o, new Array(24).fill(0)]));
+    const hourly = Object.fromEntries(DIRS.map(([o]) => [o, new Array(24).fill(0)]));
     const horiz = new Array(24).fill(0);
     let sumRt = 0;
     for (let h = 0; h < 24; h++) {
@@ -71,15 +72,35 @@ export function facadeIrradiance(lat, ghiKwh, { albedo = 0.2 } = {}) {
       const I = rt * H, Id = Math.min(I, rd * Hd), Ib = Math.max(0, I - Id);                           // MJ/m2 in this hour
       const s = sunFromHourAngle(lat, dec, w);
       horiz[h] = I * 1e6 / 3600;
-      for (const [o, g] of ORIENTS) {
+      for (const [o, g] of DIRS) {
         const cosT = s.east * Math.sin(g * D2R) + s.north * Math.cos(g * D2R);
         const Rb = s.up > 0.02 ? Math.max(0, cosT) / s.up : 0;
         const It = Ib * Rb + Id * 0.5 + I * albedo * 0.5;                                              // vertical: (1+cos90)/2 = (1-cos90)/2 = 0.5
         hourly[o][h] = It * 1e6 / 3600;                                                                // W/m2 averaged over the hour
       }
     }
-    const daily = Object.fromEntries(ORIENTS.map(([o]) => [o, hourly[o].reduce((x, y) => x + y, 0) / 1000]));   // kWh/m2/day
+    const daily = Object.fromEntries(DIRS.map(([o]) => [o, hourly[o].reduce((x, y) => x + y, 0) / 1000]));   // kWh/m2/day
     out.push({ month: MONTHS[m], n, Kt, diffuseFraction: fd, H0, sumRt, daily, hourly, horizontalHourly: horiz });
   }
   return out;
 }
+
+export const MONTH_DAYS = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const BIN_AZ = Object.fromEntries(ORIENTS);
+
+/** Per-wall solar exposure for a project. walls: [{id, azimuth_deg|null, orientation, area_m2, u_value}].
+ *  Returns F (monthly results incl. one key per wall) and, per wall: annual kWh/m2, annual kWh on the wall. */
+export function wallSolar(lat, ghiKwh, walls) {
+  const extra = {};
+  for (const w of walls) extra["w:" + w.id] = w.azimuth_deg != null ? w.azimuth_deg : BIN_AZ[w.orientation];
+  const F = facadeIrradiance(lat, ghiKwh, { extra });
+  const per = walls.map(w => {
+    const k = "w:" + w.id, annual = F.reduce((t, m, i) => t + m.daily[k] * MONTH_DAYS[i], 0);
+    return { wall: w, key: k, azimuth: extra[k], annual_kwh_m2: annual, annual_kwh: annual * (w.area_m2 || 0) };
+  });
+  return { F, per };
+}
+
+/** Steady-state solar-driven heat flux into the room through an opaque wall (W/m2):
+ *  sol-air excess (alpha * I * Rse) times U. Ignores thermal mass (the time lag delays it), wind and long-wave exchange. */
+export const solarHeatFlux = (u, alpha, I, rse = 0.04) => u * alpha * I * rse;
