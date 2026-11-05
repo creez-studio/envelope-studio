@@ -93,7 +93,7 @@ svg .hatch{stroke:var(--line-2);stroke-width:2}svg .mark{transition:opacity .12s
 /* workspace */
 .ws{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
 @media (max-width:1100px){.ws{grid-template-columns:minmax(0,1fr)}}
-.vp-wrap{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#eef0f2}
+.vp-stage{position:relative}.vp-wrap{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#eef0f2}
 #viewer{height:min(68vh,640px);min-height:420px;position:relative}
 @media (max-width:640px){#viewer{height:380px;min-height:0}}
 .vp-tools{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:8px;z-index:5}
@@ -189,14 +189,14 @@ footer{color:var(--muted);font-size:.76rem;text-align:center;padding:26px 16px}
   <div class="ws">
     <div>
       <div class="vp-wrap">
-        <div id="viewer" aria-label="3D model view"></div>
+        <div class="vp-stage"><div id="viewer" aria-label="3D model view"></div>
         <div class="vp-tools">
           <div class="vp-bar" id="vp-views"><button data-view="iso">3D</button><button data-view="top">Top</button><button data-view="south">S</button><button data-view="east">E</button><button data-view="north">N</button><button data-view="west">W</button></div>
           <div class="vp-bar" id="vp-mode"><button data-mode="select" class="on">Select</button><button data-mode="move">Move</button><button data-mode="rotate">Rotate</button></div>
           <div class="vp-bar"><button id="vp-grid" class="on">Grid</button><button id="vp-ao" class="on">AO</button><button id="vp-labels" class="on">Labels</button></div>
         </div>
         <div class="vp-legend"><div class="ramp"><span>U-value</span><span class="bar" id="ramp"></span><span>0 → 2.5+ W/m²K</span></div></div>
-        <div class="vp-status" id="v-status"></div>
+        <div class="vp-status" id="v-status"></div></div>
         <div class="sunbar">
           <b>Sun</b>
           <label>Month <select id="sun-m"></select></label>
@@ -253,7 +253,7 @@ footer{color:var(--muted);font-size:.76rem;text-align:center;padding:26px 16px}
       <label class="small" style="margin-top:18px"><input type="checkbox" id="st-apply"> Use for all external walls in the 3D model and the RETV</label></div></div>
   <div class="grid g4 mt" id="st-tiles"></div>
   <div class="grid g3 mt"><div class="card"><h3>Criteria rose</h3><p class="sub">Normalised score per criterion within the ranked set.</p><div id="st-rose"></div></div>
-    <div class="card span2"><h3>Material data</h3><p class="sub">Assembly values from ENS 2024; product values are manufacturer claims or secondary summaries (grade C).</p><div class="scroll" id="st-data"></div></div></div>
+    <div class="card span2"><h3>Material data</h3><p class="sub">Every value carries its source and grade: ENS 2024 tables, Indian lab tests (CEPT 2020), the IFC India carbon database, and market or manufacturer claims (grade C).</p><div class="scroll" id="st-data"></div></div></div>
   <div class="grid g3 mt"><div class="card"><h3>Why it scores this way</h3><ul class="lst" id="st-why"></ul></div>
     <div class="card"><h3>Suitability for this project</h3><ul class="lst" id="st-fit"></ul></div>
     <div class="card"><h3>How to reduce cost, heat and carbon</h3><ul class="lst" id="st-save"></ul><div id="st-links" class="small"></div></div></div>

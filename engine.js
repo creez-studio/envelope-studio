@@ -7,7 +7,7 @@ export function uValue(layers, catalogue, rsi, rse) {
   for (const ly of layers) {
     if (!ly.ref) return null;
     const m = catalogue[ly.ref]; const r = (ly.t_mm / 1000) / m.k; rt += r;
-    detail.push({ layer: m.name, t_mm: ly.t_mm, k: m.k, R: r, source: m.source });
+    detail.push({ layer: m.name, t_mm: ly.t_mm, k: m.k, R: r, source: m.source, grade: m.grade || "B" });
   }
   return { u: 1 / rt, rt, detail };
 }
@@ -36,8 +36,10 @@ export function deriveValues(db) {
   for (const c of db.candidates) {
     const v = {};
     const u = uValue(c.assembly.layers, db.layer_catalogue, db.surface_resistance.rsi, db.surface_resistance.rse);
-    if (u) v.u_value = { value: u.u, unit: "W/m2K", grade: "B", status: "derived", rt: u.rt, detail: u.detail,
-      note: `ENS 2024 Sec. 9.3 series method, R_T=${u.rt.toFixed(3)} m2K/W, dry-state conductivities (S01 Table 46)` };
+    if (u) { const ug = u.detail.reduce((g, d) => GRADE[d.grade] < GRADE[g] ? d.grade : g, "A");
+      const srcs = [...new Set(u.detail.map(d => d.source))].join(", ");
+      v.u_value = { value: u.u, unit: "W/m2K", grade: ug, status: "derived", rt: u.rt, detail: u.detail,
+        note: `ENS 2024 Sec. 9.3 series method, R_T=${u.rt.toFixed(3)} m2K/W, dry-state conductivities (${srcs})` }; }
     const gm = gwpPerM2(c);
     if (gm != null) { const g = c.properties.gwp;
       v.gwp_core = { value: gm, unit: "kgCO2e/m2", grade: g.grade, status: "derived", source: g.source,

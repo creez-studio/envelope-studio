@@ -531,20 +531,26 @@ function renderStudio(res, sub, area) {
   // data table
   const pr = D.market.properties[cid] || {}, cat = db.layer_catalogue;
   const core = cand.assembly.layers.filter(l => l.ref && !["cement_plaster", "eps_24", "coir_board_97"].includes(l.ref));
+  const ms = pr.measured, srcOf = m => `<span class="src">${esc(m.source)} · ${esc(m.grade || "B")}</span>`;
+  const rg = (x, nd) => !x ? "–" : x.range && x.range[0] !== x.range[1] ? `${f(x.range[0], nd)}–${f(x.range[1], nd)}` : f(x.range ? x.range[0] : x.value, nd);
   const fmtP = x => !x ? "<span class='mut'>–</span>" : x.status === "conflicting" ? `<span class="tag warn">conflicting</span> <span class="small mut">${esc(x.note)}</span>` :
     `${x.range ? x.range.join("–") : x.min != null ? "≥ " + x.min : x.max != null ? "≤ " + x.max : x.value}<span class="src">${esc(x.source || "")} · ${esc(x.grade || "")}</span>${x.note ? `<br><span class="small mut">${esc(x.note)}</span>` : ""}`;
   const rows = [
     ["Unit size (L × H × wall)", v && v.l_mm ? `${f(v.l_mm, 0)} × ${f(v.h_mm, 0)} mm, wall ${f(v.t_mm ?? core[0]?.t_mm, 0)} mm${v.joint_mm ? `, ${v.joint_mm} mm joints` : ", thin/dry joints"}${v.wythes > 1 ? `, ${v.wythes} wythes` : ""}<span class="src">${esc(v.source || "")}</span>` : "<span class='mut'>–</span>"],
     ["Market price", v && v.price_inr != null ? `INR ${v.price_inr} per piece${v.price_range ? ` (range ${v.price_range.join("–")})` : ""}${v.city && v.city !== "-" ? " · " + esc(v.city) : ""}<span class="src">${esc(v.source)} · C</span>` : "<span class='mut'>not listed</span>"],
     ["Assembly", cand.assembly.layers.map(l => l.ref ? `${l.t_mm} mm ${esc(cat[l.ref].name.split(",")[0])}` : `<i>${l.t_mm} mm ${esc(l.label)}</i>`).join(" + ") || "<span class='mut'>not defined</span>"],
-    ["Core density (ENS table)", core[0] ? `${cat[core[0].ref].density} kg/m³<span class="src">S01 · B</span>` : "–"],
-    ["Product density (claimed)", fmtP(pr.density_kg_m3)],
-    ["Conductivity k", core[0] ? `${cat[core[0].ref].k} W/mK (dry)<span class="src">S01 · B</span>` : "<span class='mut'>no cited value</span>"],
-    ["Specific heat", core[0] && cat[core[0].ref].cp_kj_kgK ? `${cat[core[0].ref].cp_kj_kgK} kJ/kgK<span class="src">S01 · B</span>` : "–"],
+    ["Core density (calculation)", core[0] ? `${cat[core[0].ref].density} kg/m³${srcOf(cat[core[0].ref])}` : "–"],
+    ["Product density", fmtP(pr.density_kg_m3)],
+    ["Conductivity k", core[0] ? `${cat[core[0].ref].k} W/mK (dry)${srcOf(cat[core[0].ref])}` : "<span class='mut'>no cited value</span>"],
+    ["Specific heat", core[0] && cat[core[0].ref].cp_kj_kgK ? `${cat[core[0].ref].cp_kj_kgK} kJ/kgK${srcOf(cat[core[0].ref])}` : "–"],
+    ["Measured in Indian labs", ms ? `${ms.n} sample${ms.n > 1 ? "s" : ""}: density ${rg(ms.density_kg_m3, 0)} kg/m³ · k ${rg(ms.k_W_mK, 2)} W/mK · cp ${rg(ms.cp_J_kgK, 0)} J/kgK · wall U ${rg(ms.u_200mm_wall, 2)} W/m²K<span class="src">${esc(ms.source)} · ${esc(ms.grade)}</span><br><span class="small mut">${esc(ms.samples)}. ${esc(ms.note)}</span>` : "<span class='mut'>no lab data collected</span>"],
     ["Compressive strength (N/mm²)", fmtP(pr.compressive_n_mm2)],
     ["Sound reduction (dB)", fmtP(pr.sound_db)],
     ["Water absorption (%)", fmtP(pr.water_absorption_pct)],
     ["Fire resistance (min)", fmtP(pr.fire_min)],
+    ["Embodied energy (MJ/kg)", fmtP(pr.embodied_energy_mj_kg)],
+    ["Recycled content (%)", fmtP(pr.recycled_content_pct)],
+    ["Carbon factor", cand.properties.gwp?.value != null ? `${cand.properties.gwp.value} ${esc(cand.properties.gwp.unit)}<span class="src">${esc(cand.properties.gwp.source)} · ${esc(cand.properties.gwp.grade)}</span><br><span class="small mut">${esc(cand.properties.gwp.basis || "")}</span>` : `<span class='mut'>none</span>${cand.properties.gwp?.note ? `<br><span class="small mut">${esc(cand.properties.gwp.note)}</span>` : ""}`],
     ["Decrement / time lag", ind[cid] ? `${f(ind[cid].decrement_factor)} · ${f(ind[cid].time_lag_h, 1)} h<span class="src">EN ISO 13786</span>` : "–"],
     ["Indian standard", esc(pr.standard || "–") + (pr.note ? `<br><span class="small mut">${esc(pr.note)}</span>` : "")],
     ["Rating notes", (cand.rating_notes || []).map(esc).join("<br>") || "–"],

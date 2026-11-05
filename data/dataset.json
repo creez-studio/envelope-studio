@@ -1,7 +1,7 @@
 {
  "db": {
-  "schema_version": "3.0",
-  "prepared": "2026-11-04",
+  "schema_version": "3.1",
+  "prepared": "2026-11-05",
   "functional_unit": "1 m2 of external wall, 12 mm cement plaster on both faces unless stated, conductivities in the dry state (moisture effects not modelled)",
   "policy": {
    "missing_value_policy": "A missing value is never imputed. A material is ranked only if the weight of criteria that have a value at or above min_grade is at least min_completeness. Scores use only available criteria with weights renormalised, and are labelled partial.",
@@ -89,7 +89,8 @@
     "k": 0.721,
     "cp_kj_kgK": 0.84,
     "source": "S01",
-    "locator": "Table 46 #19"
+    "locator": "Table 46 #19",
+    "grade": "B"
    },
    "clay_brick_1920": {
     "name": "Solid burnt clay brick, 1920 kg/m3",
@@ -97,7 +98,8 @@
     "k": 0.98,
     "cp_kj_kgK": 0.8,
     "source": "S01",
-    "locator": "Table 46 #1"
+    "locator": "Table 46 #1",
+    "grade": "B"
    },
    "clay_brick_1760": {
     "name": "Solid burnt clay brick, 1760 kg/m3",
@@ -105,7 +107,8 @@
     "k": 0.85,
     "cp_kj_kgK": null,
     "source": "S01",
-    "locator": "Table 46 #2"
+    "locator": "Table 46 #2",
+    "grade": "B"
    },
    "hollow_clay_1520": {
     "name": "Resource-efficient (hollow) brick, 1520 kg/m3",
@@ -113,7 +116,8 @@
     "k": 0.631,
     "cp_kj_kgK": 0.65,
     "source": "S01",
-    "locator": "Table 46 #5"
+    "locator": "Table 46 #5",
+    "grade": "B"
    },
    "fly_ash_brick_1650": {
     "name": "Fly ash brick, 1650 kg/m3",
@@ -121,7 +125,8 @@
     "k": 0.856,
     "cp_kj_kgK": 0.93,
     "source": "S01",
-    "locator": "Table 46 #6"
+    "locator": "Table 46 #6",
+    "grade": "B"
    },
    "aac_642": {
     "name": "AAC block, 642 kg/m3",
@@ -129,7 +134,8 @@
     "k": 0.184,
     "cp_kj_kgK": 1.24,
     "source": "S01",
-    "locator": "Table 46 #9"
+    "locator": "Table 46 #9",
+    "grade": "B"
    },
    "cseb_1800": {
     "name": "Cement-stabilised soil block (CSEB), 1800 kg/m3",
@@ -137,7 +143,8 @@
     "k": 1.201,
     "cp_kj_kgK": 1.07,
     "source": "S01",
-    "locator": "Table 46 #11"
+    "locator": "Table 46 #11",
+    "grade": "B"
    },
    "solid_concrete_block_2427": {
     "name": "Solid concrete block 25/50, 2427 kg/m3",
@@ -145,7 +152,8 @@
     "k": 1.396,
     "cp_kj_kgK": 0.2,
     "source": "S01",
-    "locator": "Table 46 #7"
+    "locator": "Table 46 #7",
+    "grade": "B"
    },
    "eps_24": {
     "name": "Expanded polystyrene, 24 kg/m3",
@@ -153,7 +161,8 @@
     "k": 0.035,
     "cp_kj_kgK": 1.34,
     "source": "S01",
-    "locator": "Insulating materials #2"
+    "locator": "Insulating materials #2",
+    "grade": "B"
    },
    "cellular_concrete_704": {
     "name": "Cellular concrete (CLC), 704 kg/m3",
@@ -161,7 +170,8 @@
     "k": 0.188,
     "cp_kj_kgK": 1.05,
     "source": "S01",
-    "locator": "Table 46 #21"
+    "locator": "Table 46 #21",
+    "grade": "B"
    },
    "cseb_1700": {
     "name": "Cement-stabilised soil block (CSEB), 1700 kg/m3",
@@ -169,7 +179,8 @@
     "k": 1.026,
     "cp_kj_kgK": 1.03,
     "source": "S01",
-    "locator": "Table 46 #10"
+    "locator": "Table 46 #10",
+    "grade": "B"
    },
    "cseb_1900": {
     "name": "Cement-stabilised soil block (CSEB), 1900 kg/m3",
@@ -177,7 +188,8 @@
     "k": 1.303,
     "cp_kj_kgK": 1.07,
     "source": "S01",
-    "locator": "Table 46 #12"
+    "locator": "Table 46 #12",
+    "grade": "B"
    },
    "mud_phuska_1622": {
     "name": "Mud phuska, 1622 kg/m3",
@@ -185,7 +197,8 @@
     "k": 0.519,
     "cp_kj_kgK": 0.88,
     "source": "S01",
-    "locator": "Table 46 #17"
+    "locator": "Table 46 #17",
+    "grade": "B"
    },
    "coir_board_97": {
     "name": "Coir board, 97 kg/m3",
@@ -193,7 +206,8 @@
     "k": 0.038,
     "cp_kj_kgK": 1.0,
     "source": "S01",
-    "locator": "Insulating materials #36"
+    "locator": "Insulating materials #36",
+    "grade": "B"
    },
    "coconut_pith_board_520": {
     "name": "Coconut pith insulation board, 520 kg/m3",
@@ -201,7 +215,8 @@
     "k": 0.06,
     "cp_kj_kgK": 1.09,
     "source": "S01",
-    "locator": "Insulating materials #32"
+    "locator": "Insulating materials #32",
+    "grade": "B"
    },
    "wood_wool_board_398": {
     "name": "Wood-wool board (cement bonded), 398 kg/m3",
@@ -209,7 +224,8 @@
     "k": 0.081,
     "cp_kj_kgK": 1.13,
     "source": "S01",
-    "locator": "Insulating materials #34"
+    "locator": "Insulating materials #34",
+    "grade": "B"
    },
    "foam_concrete_400": {
     "name": "Foam concrete, 400 kg/m3",
@@ -217,7 +233,17 @@
     "k": 0.084,
     "cp_kj_kgK": 0.92,
     "source": "S01",
-    "locator": "Insulating materials #7"
+    "locator": "Insulating materials #7",
+    "grade": "B"
+   },
+   "laterite_1930": {
+    "name": "Laterite stone, 1930 kg/m3",
+    "density": 1930,
+    "k": 0.55,
+    "cp_kj_kgK": 0.9959,
+    "source": "S22",
+    "grade": "C",
+    "locator": "Table 3 (calibrated simulation input; originally Lawane et al. 2014)"
    }
   },
   "candidates": [
@@ -234,33 +260,30 @@
        "t_mm": 12
       },
       {
-       "ref": null,
-       "label": "Laterite block core (no cited conductivity)",
-       "t_mm": 200
+       "ref": "laterite_1930",
+       "t_mm": 230
       },
       {
        "ref": "cement_plaster",
        "t_mm": 12
       }
      ],
-     "note": "Core thickness is a placeholder. ENS Table 46 has no laterite entry; U-value cannot be calculated until a cited conductivity exists."
+     "note": "230 mm laterite as in the S22 case-study houses. k 0.55 W/mK is a calibrated literature value (grade C), not a Kerala test: measure per IS 3620 quarry samples before relying on it."
     },
     "properties": {
      "core_density": {
-      "status": "missing",
-      "grade": "D",
-      "note": "Quarry-specific; measure per IS 9620 (S08) test report."
+      "value": 1930,
+      "unit": "kg/m3",
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S22",
+      "locator": "Table 3"
      },
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "No cited LCA/EPD. Quarried, unfired - low carbon is plausible but UNPROVEN."
+      "note": "S20 (IFC India) has no laterite block dataset; 'polished stone cladding' (0.31 kgCO2e/kg) and 'stone floor tile' (0.056) are different products and are not borrowed."
      }
-    },
-    "candidate_unverified": {
-     "k_W_mK": 0.51,
-     "source": "S07",
-     "note": "Reported by an unidentified Malabar study; excluded from all calculations."
     },
     "rating_notes": [
      "GRIHA 19.1.3 lists 'Stones from India (not including stone cladding)' - whether quarried laterite blocks qualify must be confirmed with GRIHA."
@@ -274,6 +297,10 @@
      {
       "source": "S10",
       "text": "Kozhikode lateritic soil blocks: 8% cement by soil weight reported optimum; strength and density rise, water absorption falls with cement. No conductivity reported. Search summary only."
+     },
+     {
+      "source": "S24",
+      "text": "Kerala quarry price 2026: about Rs 34.50 per stone in Kannur and about Rs 30 in Kasaragod (size not stated)."
      }
     ]
    },
@@ -309,20 +336,20 @@
       "locator": "Table 46 #1"
      },
      "gwp": {
-      "value": 642.87,
-      "unit": "kgCO2e/m3",
+      "value": 0.39,
+      "unit": "kgCO2e/kg",
       "grade": "B",
       "status": "read_primary",
-      "source": "S04",
-      "basis": "Auroville Earth Institute, 'country fired bricks', India (Auroville/Pondicherry), 2005. Page states 'Kg of CO2', not CO2e; modules not stated. Same source and basis as the CSEB figure.",
+      "source": "S20",
+      "locator": "Table 14 'Brick (common/facing)'",
+      "basis": "IFC India database 2017 (draft), 'Brick (common/facing)': 0.39 kgCO2e/kg, 4.4 MJ/kg, cradle-to-gate A1-A3, IPCC AR5, Indian production mix, modelled at 1760 kg/m3. Kiln variants in the same table: Bull's trench 0.32, Hoffman 0.31, clamp 0.57, zigzag 0.59 kgCO2e/kg.",
+      "embodied_energy_mj_kg": 4.4,
       "alternative": {
-       "value_range": [
-        0.1,
-        0.22
-       ],
-       "unit": "kgCO2/kg",
-       "source": "S05",
-       "note": "Evora paper Table 1, ceramic block: ICE 2011 (UK) 0.22, Portugal 0.112 and 0.100, UM 0.19. At 1920 kg/m3 x 230 mm this gives 44-97 kgCO2/m2 versus 147.9 from Auroville."
+       "value": 642.87,
+       "unit": "kgCO2e/m3",
+       "source": "S04",
+       "grade": "B",
+       "basis": "Auroville Earth Institute, 'country fired bricks', India (Auroville/Pondicherry), 2005. Page states 'Kg of CO2', not CO2e; modules not stated. Same source and basis as the CSEB figure."
       }
      },
      "masonry_unit": {
@@ -378,12 +405,21 @@
       "locator": "Table 46 #9"
      },
      "gwp": {
-      "value": 0.28,
+      "value": 0.5,
       "unit": "kgCO2e/kg",
-      "grade": "C",
+      "grade": "B",
       "status": "read_primary",
-      "source": "S03",
-      "basis": "UK average AAC (61% pfa) from an APA/British Precast EPD via Climatiq; GWP method and lifecycle modules not stated by aggregator; not an Indian product."
+      "source": "S20",
+      "locator": "Table 14 'Aircrete (autoclaved aerated concrete)'",
+      "basis": "IFC India database 2017 (draft), 'Aircrete (autoclaved aerated concrete)': 0.5 kgCO2e/kg, 3.7 MJ/kg, cradle-to-gate A1-A3, IPCC AR5, Indian production mix, modelled at 500 kg/m3. Replaces the UK aggregator figure (0.28, S03).",
+      "embodied_energy_mj_kg": 3.7,
+      "alternative": {
+       "value": 0.28,
+       "unit": "kgCO2e/kg",
+       "source": "S03",
+       "grade": "C",
+       "basis": "UK average AAC (61% pfa) from an APA/British Precast EPD via Climatiq; GWP method and lifecycle modules not stated by aggregator; not an Indian product."
+      }
      },
      "masonry_unit": {
       "price_inr": 83,
@@ -441,12 +477,21 @@
       "locator": "Table 46 #11 (soil-cement block, Balaji et al. 2015)"
      },
      "gwp": {
-      "value": 49.37,
-      "unit": "kgCO2e/m3",
+      "value": 0.096,
+      "unit": "kgCO2e/kg",
       "grade": "B",
       "status": "read_primary",
-      "source": "S04",
-      "basis": "Auroville hand-press CSEB, 5% cement, 2005 (India). Page also shows 51.5 kg/m3 in a second table; unit kg CO2, modules not stated."
+      "source": "S20",
+      "locator": "Table 14 'OPC stabilized soil block'",
+      "basis": "IFC India database 2017 (draft), 'OPC stabilized soil block': 0.096 kgCO2e/kg, 0.7 MJ/kg, cradle-to-gate A1-A3, IPCC AR5, Indian production mix, modelled at 2000 kg/m3. Cement content not stated per block; PFA-stabilised 0.010 and slag-cement-stabilised 0.073 in the same table.",
+      "embodied_energy_mj_kg": 0.7,
+      "alternative": {
+       "value": 49.37,
+       "unit": "kgCO2e/m3",
+       "source": "S04",
+       "grade": "B",
+       "basis": "Auroville hand-press CSEB, 5% cement, 2005 (India). Page also shows 51.5 kg/m3 in a second table; unit kg CO2, modules not stated."
+      }
      }
     },
     "rating_notes": [
@@ -491,7 +536,13 @@
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "Cement content drives GWP; need product EPD or mix design."
+      "factor_held": {
+       "value": 0.29,
+       "unit": "kgCO2e/kg",
+       "source": "S20",
+       "dataset": "Medium density concrete block (hollow or solid, 1400 kg/m3)"
+      },
+      "note": "Factor held, but the block's density and conductivity are not cited, so no per-m2 value is computed."
      },
      "masonry_unit": {
       "price_inr": 50,
@@ -548,9 +599,27 @@
       "locator": "Table 46 #6 (Gourav et al. 2017)"
      },
      "gwp": {
-      "status": "missing",
-      "grade": "D",
-      "note": "No cited value."
+      "value": 0.2,
+      "unit": "kgCO2e/kg",
+      "grade": "C",
+      "status": "read_primary",
+      "source": "S20",
+      "locator": "Table 14 'FaLG (fly ash/lime/gypsum) block'",
+      "basis": "IFC India database 2017 (draft), 'FaLG (fly ash/lime/gypsum) block': 0.2 kgCO2e/kg, 0.83 MJ/kg, cradle-to-gate A1-A3, IPCC AR5, Indian production mix, modelled at 1760 kg/m3. Mapping: Kerala fly ash bricks are often fly ash + cement + quarry dust rather than FaL-G, so the match is approximate (grade C).",
+      "embodied_energy_mj_kg": 0.83
+     },
+     "masonry_unit": {
+      "price_inr": 7,
+      "l_mm": 230,
+      "h_mm": 75,
+      "joint_mm": 10,
+      "wythes": 2,
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S11",
+      "unit": "INR/piece",
+      "value": 7,
+      "note": "Thiruvananthapuram aggregator estimate, 230 x 110 x 75 mm, two wythes for a 230 mm wall."
      }
     },
     "rating_notes": [
@@ -595,9 +664,27 @@
       "locator": "Table 46 #5 (CBERD database)"
      },
      "gwp": {
-      "status": "missing",
-      "grade": "D",
-      "note": "No cited value."
+      "value": 0.31,
+      "unit": "kgCO2e/kg",
+      "grade": "C",
+      "status": "read_primary",
+      "source": "S20",
+      "locator": "Table 14 'Honeycomb brick'",
+      "basis": "IFC India database 2017 (draft), 'Honeycomb brick': 0.31 kgCO2e/kg, 3.5 MJ/kg, cradle-to-gate A1-A3, IPCC AR5, Indian production mix, modelled at 700 kg/m3. Mapping: the nearest dataset for perforated/hollow clay blocks (Hoffman-kiln fired clay, same factor as 'Brick - Hoffman kiln').",
+      "embodied_energy_mj_kg": 3.5
+     },
+     "masonry_unit": {
+      "price_inr": 104,
+      "l_mm": 400,
+      "h_mm": 200,
+      "joint_mm": 0,
+      "wythes": 1,
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S25",
+      "unit": "INR/piece",
+      "value": 104,
+      "note": "Porotherm HP 200 (16 x 8 x 8 in) asking price, Coimbatore (Tamil Nadu) - no Kerala listing found; joint taken as 0 mm."
      }
     },
     "rating_notes": [
@@ -627,7 +714,7 @@
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "Do not assume low carbon without an LCA boundary."
+      "note": "No Indian product LCA; laboratory studies (S26) report large reductions but mix-specific."
      }
     },
     "rating_notes": [],
@@ -635,7 +722,13 @@
      "structural": "not_assessed",
      "fire": "not_assessed",
      "moisture": "not_assessed"
-    }
+    },
+    "reported_notes": [
+     {
+      "source": "S26",
+      "text": "Mawra et al. 2024 (abstract): rice-husk-ash geopolymer, 26.8 MPa, 1510 kg/m3, water absorption 6.8 %, k 0.552 W/mK. Raut et al. 2023: fly-ash geopolymer blocks with lower k and absorption than fired bricks. Laboratory mixes - not used."
+     }
+    ]
    },
    {
     "id": "RAB",
@@ -654,7 +747,8 @@
      },
      "gwp": {
       "status": "missing",
-      "grade": "D"
+      "grade": "D",
+      "note": "No Indian product LCA or EPD found."
      }
     },
     "rating_notes": [
@@ -664,7 +758,13 @@
      "structural": "not_assessed",
      "fire": "not_assessed",
      "moisture": "not_assessed"
-    }
+    },
+    "reported_notes": [
+     {
+      "source": null,
+      "text": "Search on 2026-11-05 found no Indian recycled-aggregate block with published conductivity, density and LCA together."
+     }
+    ]
    },
    {
     "id": "SAND",
@@ -705,7 +805,7 @@
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "EPS and masonry A1-A3 not cited."
+      "note": "Multi-leaf assembly: the core-only method would count one brick leaf only. Brick 0.39 and EPS 2.9 kgCO2e/kg (S20) are held for a future whole-assembly method."
      }
     },
     "rating_notes": [],
@@ -750,7 +850,7 @@
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "No cited LCA/EPD for CLC found; do not borrow the AAC factor."
+      "note": "S20 has no foam/cellular concrete dataset ('lightweight concrete block' uses expanded clay aggregate, a different product)."
      }
     },
     "rating_notes": [
@@ -801,7 +901,7 @@
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "Coir-board carbon not collected; brick factor is for the brick only and the layer is not carbon-scored."
+      "note": "S20 has no coir-board dataset; the brick-only value would hide the coir layer."
      }
     },
     "rating_notes": [
@@ -856,7 +956,7 @@
      "gwp": {
       "status": "missing",
       "grade": "D",
-      "note": "No cited carbon factor for CLC or EPS."
+      "note": "No CLC dataset in S20; EPS 2.9 kgCO2e/kg held."
      }
     },
     "rating_notes": [],
@@ -899,9 +999,27 @@
       "locator": "Table 46 #7"
      },
      "gwp": {
-      "status": "missing",
-      "grade": "D",
-      "note": "No cited carbon factor for Indian solid concrete blocks."
+      "value": 0.16,
+      "unit": "kgCO2e/kg",
+      "grade": "B",
+      "status": "read_primary",
+      "source": "S20",
+      "locator": "Table 14 'Dense concrete block'",
+      "basis": "IFC India database 2017 (draft), 'Dense concrete block': 0.16 kgCO2e/kg, 1.3 MJ/kg, cradle-to-gate A1-A3, IPCC AR5, Indian production mix, modelled at 2200 kg/m3. IFC models 1800-2200 kg/m3; ENS density 2427 kg/m3 is used for the wall.",
+      "embodied_energy_mj_kg": 1.3
+     },
+     "masonry_unit": {
+      "price_inr": 55,
+      "l_mm": 400,
+      "h_mm": 200,
+      "joint_mm": 0,
+      "wythes": 1,
+      "grade": "C",
+      "status": "secondary_reported",
+      "source": "S11",
+      "unit": "INR/piece",
+      "value": 55,
+      "note": "Kochi aggregator estimate, 400 x 200 x 200 mm; joint taken as 0 mm."
      }
     },
     "rating_notes": [
@@ -915,10 +1033,10 @@
    }
   ],
   "unfilled_criteria": {
-   "cost": "Only masonry-unit price (secondary listings, S11/S12) is held; installed cost still needs 8-12 dealer quotations.",
-   "service_life": "No evidence-graded value collected.",
-   "availability": "Awaiting supplier survey.",
-   "maintenance": "Awaiting expert / inspection evidence."
+   "cost": "Masonry-unit price only (grade C listings); CSEB, CLC and laterite still lack a Kerala price with a stated unit size, so cost is not scored. Installed cost needs dealer quotations.",
+   "service_life": "Searched 2026-11-05. The only values found are generic (e.g. 80 years for any masonry/concrete external wall, Baunetz Wissen after the German BBSR table), identical for every option, so they cannot discriminate. Needs Kerala durability evidence.",
+   "availability": "Cannot be read from the web: needs a supplier survey (Kollam, Kochi, Thiruvananthapuram). Listing counts are not a substitute.",
+   "maintenance": "Needs expert judgement or inspection evidence; no published Kerala data found."
   },
   "legacy_indicative": {
    "_note": "Original prototype values, all verified=false, kept only for the 'legacy parity' demo. Do not treat as findings. Note: legacy U-values differ from ENS-method calculations (e.g. CSEB 1.60 legacy vs calculated value).",
@@ -1222,6 +1340,83 @@
    "accessed": "2026-11-05",
    "verification": "search_summary_only",
    "note": "Clay brick class 3.5 N/mm2 minimum (IS 1077); fly ash brick 7.5 N/mm2 minimum, 230x110x75 mm, absorption limit reported as 15-20% (IS 12894); hollow block Grade A 3.5 N/mm2, density >= 1500 kg/m3 (IS 2185-1:2005). Sources disagree; check BIS texts."
+  },
+  {
+   "id": "S20",
+   "title": "India Construction Materials Database of Embodied Energy and Global Warming Potential - Methodology Report, Version 1.0 (draft), 30 Nov 2017",
+   "org": "International Finance Corporation (IFC, World Bank Group) / thinkstep, for EDGE; co-funded by the European Union",
+   "type": "national_lca_dataset",
+   "url": "https://edgebuildings.com/ifc-india-construction-materials-database-methodology-report/",
+   "locator": "Table 14 (Annex A, pp.67-69) embodied energy MJ/kg and GWP kgCO2e/kg; Table 18 (Annex F) modelled densities; Table 7 aircrete inputs; Sec. D system boundary",
+   "accessed": "2026-11-05",
+   "verification": "opened_and_read",
+   "note": "Cradle-to-gate, EN 15804 modules A1-A3; GWP = IPCC AR5 GWP100 incl. biogenic carbon; Indian production mix (e.g. brick: 185 of 257.5 billion bricks/yr from Bull's trench kilns, Table 10). Results per kg product. Cover page marked DRAFT."
+  },
+  {
+   "id": "S21",
+   "title": "Thermal Performance of Walling Material and Wall Technology - Part 1: National Database of Thermophysical Properties of Walling Materials; Part 2: Derivation of U-values of Industrially Manufactured Wall Assemblies (June 2020)",
+   "org": "Rawal R., Maithel S., Shukla Y., Rana S., Gowri G., Patel J., Kumar S. - CEPT Research and Development Foundation (CEPT University) and Greentech Knowledge Solutions; BEEP India (Indo-Swiss)",
+   "type": "measured_national_database",
+   "url": "https://shaktifoundation.in/wp-content/uploads/2022/01/Thermal-performance-of-Walling-Material-and-Wall-Technology-1.pdf",
+   "locator": "Part 1 Tables 3.2, 3.4, 3.6 (measured density, k, cp, compressive strength, water absorption), Table 4.1 (U-value of 200 mm wall + 15 mm plaster both sides); Part 2 Table 3 (guarded hot box U-values)",
+   "accessed": "2026-11-05",
+   "verification": "opened_and_read",
+   "note": "42 samples from 13 states; k and cp by ISO 22007-2 transient plane source, density ASTM C20, absorption and strength IS 3495 / IS 2185. No Kerala sample (nearest: Tamil Nadu, Karnataka). Hollow concrete blocks and laterite were not tested. ENS 2024 Table 46 source (4) is the CBERD database from the same group."
+  },
+  {
+   "id": "S22",
+   "title": "A Case Study on Thermal Performance in Residences with Laterite Stone and Rammed Earth Walling Materials in A Warm and Humid Climate",
+   "org": "Uma P. and Rashmin Damle, CEPT University - Energise 2023 Conference Proceedings, pp.19-29",
+   "type": "conference_paper",
+   "url": "https://energiseindia.in/2023/wp-content/uploads/2024/05/A-Case-Study-on-Thermal-Performance-in-Residences.pdf",
+   "locator": "Table 3: laterite stone rho 1930 kg/m3, k 0.55 W/mK, cp 995.9 J/kgK (cited to Lawane et al. 2014, J. Mater. Civ. Eng. 26(7) 05014002); Table 1: 230 mm walls; coastal Karnataka (Mangalore TMY)",
+   "accessed": "2026-11-05",
+   "verification": "opened_and_read",
+   "note": "The properties are literature values (West African laterite, Lawane et al.) that the authors selected because their DesignBuilder model matched surface temperatures measured in a laterite house in coastal Karnataka (correlation 0.96). Not a Kerala laboratory test: grade C."
+  },
+  {
+   "id": "S23",
+   "title": "Life Cycle Assessment of Sustainable Materials",
+   "org": "Gaur S., Bhalla A. (GRIHA Council) and Sethi N. L. - SACE 2025, Atlantis Highlights in Sustainable Development, pp.316-329, doi:10.2991/978-94-6463-964-3_15",
+   "type": "conference_paper",
+   "url": "https://www.atlantis-press.com/article/126020489.pdf",
+   "locator": "Table 2: walling blocks average GWP 192.55 kgCO2e per m3 (EPD-based, cradle to gate A1-A3)",
+   "accessed": "2026-11-05",
+   "verification": "opened_and_read",
+   "note": "One average for all walling-block EPDs (clay, fly ash, AAC...), not per material; some EPDs are from South-East Asia. Used only as a benchmark."
+  },
+  {
+   "id": "S24",
+   "title": "Kannur laterite quarries roll back Rs 8 hike after talks; labour shortage keeps units shut",
+   "org": "Onmanorama (Malayala Manorama), 27 April 2026",
+   "type": "news_report",
+   "url": "https://www.onmanorama.com/news/kerala/2026/04/27/kannur-laterite-quarries-roll-back-rs-8-hike-after-talks-labour-shortage-keeps-units-shut.html",
+   "locator": "Kannur about Rs 34.50 per stone (within 7 km of quarries); Kasaragod first-quality stone about Rs 30",
+   "accessed": "2026-11-05",
+   "verification": "opened_and_read",
+   "note": "Stone size is not stated, so a cost per m2 cannot be derived from it."
+  },
+  {
+   "id": "S25",
+   "title": "IndiaMART category listings: clay blocks (Porotherm) and My Stone, Kasaragod (laterite)",
+   "org": "indiamart.com sellers",
+   "type": "price_listing",
+   "url": "https://m.indiamart.com/impcat/clay-block.html",
+   "locator": "Porotherm Clay Hollow Block HP 200, 16 x 8 x 8 in, Rs 104/piece, CA Enterprises, Coimbatore (page updated 31 Oct 2026); https://m.indiamart.com/my-stone-kasaragod: normal laterite Rs 40/piece, dressed Rs 100/piece (sizes not stated)",
+   "accessed": "2026-11-05",
+   "verification": "opened_and_read",
+   "note": "Asking prices, not quotations. No Kerala seller of Porotherm was listed; Coimbatore is the nearest."
+  },
+  {
+   "id": "S26",
+   "title": "Peer-reviewed geopolymer block studies (abstracts only)",
+   "org": "Mawra K. et al. 2024, Construction and Building Materials; Raut A. et al. 2023, Construction and Building Materials",
+   "type": "journal_abstracts",
+   "url": "https://consensus.app/papers/details/26fa6266d17d59d28a2bb7ac4586ec3e/",
+   "locator": "Mawra 2024 abstract: RHA geopolymer, 26.8 MPa, 1510 kg/m3, water absorption 6.8 %, k 0.552 W/mK",
+   "accessed": "2026-11-05",
+   "verification": "search_summary_only",
+   "note": "Laboratory mixes, not market products; values are mix-specific. Reported only, never used in a calculation."
   }
  ],
  "ratings": {
@@ -1349,25 +1544,25 @@
       "preferred": "lower",
       "engine_status": "partial",
       "role": "decision_criterion",
-      "note": "core-only, mixed boundaries (gwp_core)"
+      "note": "core-only, IFC India 2017 (S20) for 6 of 14; mixed with no value for the rest"
      },
      {
       "id": "embodied_energy",
       "name": "Embodied energy",
       "unit": "MJ/m2",
       "preferred": "lower",
-      "engine_status": "data_needed",
+      "engine_status": "partial",
       "role": "descriptor_or_evidence",
-      "note": ""
+      "note": "IFC India 2017 MJ/kg (S20) for 7 materials; descriptor"
      },
      {
       "id": "recycled_content",
       "name": "Recycled content",
       "unit": "% by mass",
       "preferred": "higher",
-      "engine_status": "data_needed",
+      "engine_status": "partial",
       "role": "descriptor_or_evidence",
-      "note": "GRIHA 19.1.3 / IGBC thresholds apply"
+      "note": "modelled mix shares (S20) for AAC and FaLG only"
      },
      {
       "id": "renewable_content",
@@ -1510,9 +1705,9 @@
       "name": "Water absorption",
       "unit": "% by mass",
       "preferred": "lower",
-      "engine_status": "data_needed",
+      "engine_status": "partial",
       "role": "material_property",
-      "note": "IS test values per product"
+      "note": "measured, CEPT 2020 (S21) for 6 materials"
      },
      {
       "id": "capillary_absorption",
@@ -1607,7 +1802,7 @@
       "preferred": "higher",
       "engine_status": "data_needed",
       "role": "decision_criterion",
-      "note": "scored criterion, not yet evidenced"
+      "note": "only generic, non-discriminating values found (see unfilled_criteria)"
      },
      {
       "id": "weathering",
@@ -2598,6 +2793,16 @@
    "compliant_at_limit": true
   },
   "retv_if_all_walls_were": {
+   "LAT": {
+    "retv": 11.125558566864537,
+    "retv_rounded": 11,
+    "limit": 15,
+    "a_env_m2": 108.0,
+    "opaque_part": 7.419529083531205,
+    "opening_conduction_part": 0.5288461266666666,
+    "opening_solar_part": 3.177183356666666,
+    "compliant_at_limit": true
+   },
    "BRICK": {
     "retv": 14.233899289148132,
     "retv_rounded": 14,
@@ -3059,6 +3264,42 @@
      "date": "2026",
      "note": "Size missing: cost per m2 cannot be computed.",
      "priced_per": "piece"
+    },
+    {
+     "id": "lat-kannur-2026",
+     "label": "Laterite stone, Kannur quarry price Apr 2026 (size not stated)",
+     "city": "Kannur",
+     "l_mm": null,
+     "h_mm": null,
+     "t_mm": null,
+     "joint_mm": 10,
+     "wythes": 1,
+     "price_inr": 34.5,
+     "price_range": null,
+     "source": "S24",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "News report; size missing, so cost per m2 cannot be computed.",
+     "priced_per": "piece"
+    },
+    {
+     "id": "lat-kasaragod-2026",
+     "label": "First-quality laterite, Kasaragod, Apr 2026 (size not stated)",
+     "city": "Kasaragod",
+     "l_mm": null,
+     "h_mm": null,
+     "t_mm": null,
+     "joint_mm": 10,
+     "wythes": 1,
+     "price_inr": 30,
+     "price_range": null,
+     "source": "S24",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "News report; size missing.",
+     "priced_per": "piece"
     }
    ],
    "CLC": [
@@ -3080,26 +3321,47 @@
      "note": "IndiaMART CLC listings found were outside Kerala (Chennai ₹45, Bobbili ₹40, sizes not confirmed).",
      "priced_per": "piece"
     }
+   ],
+   "PCB": [
+    {
+     "id": "pcb-hp200-cbe",
+     "label": "Porotherm HP 200, 16 x 8 x 8 in, Coimbatore seller",
+     "city": "Coimbatore",
+     "l_mm": 400,
+     "h_mm": 200,
+     "t_mm": 200,
+     "joint_mm": 0,
+     "wythes": 1,
+     "price_inr": 104,
+     "price_range": null,
+     "source": "S25",
+     "grade": "C",
+     "status": "secondary_reported",
+     "date": "2026",
+     "note": "Nearest listing to Kerala; joint taken as 0 mm.",
+     "priced_per": "piece"
+    }
    ]
   },
   "properties": {
    "AAC": {
     "density_kg_m3": {
      "range": [
-      550,
-      650
+      608,
+      623
      ],
-     "source": "S17",
-     "grade": "C"
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, 2 Indian AAC blocks; listings claim 550-650 (S17)."
     },
     "compressive_n_mm2": {
      "range": [
-      3,
-      4.5
+      2.7,
+      3.4
      ],
-     "source": "S16",
-     "grade": "C",
-     "note": "Birla Aerocon claims >= 4; listings show >3 and 3-4.5."
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=2 Indian samples (mean 3.05 MPa)."
     },
     "sound_db": {
      "range": [
@@ -3111,41 +3373,241 @@
      "note": "Manufacturer sound reduction claims (Birla 37-42 dB, Magicrete about 44 dB); test standard and thickness not stated."
     },
     "water_absorption_pct": {
-     "status": "conflicting",
-     "note": "Secondary sources give <=10% and <=25% for IS 2185-3; not used."
+     "range": [
+      72,
+      73
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=2 Indian samples (mean 72.5 %)."
     },
-    "standard": "IS 2185 (Part 3)"
+    "standard": "IS 2185 (Part 3)",
+    "measured": {
+     "source": "S21",
+     "grade": "B",
+     "n": 2,
+     "samples": "2 AAC blocks (Nagpur, Jhajjar)",
+     "density_kg_m3": {
+      "range": [
+       608,
+       623
+      ],
+      "mean": 615.5
+     },
+     "k_W_mK": {
+      "range": [
+       0.17,
+       0.19
+      ],
+      "mean": 0.18
+     },
+     "cp_J_kgK": {
+      "range": [
+       831.0,
+       875.5
+      ],
+      "mean": 853.25
+     },
+     "compressive_n_mm2": {
+      "range": [
+       2.7,
+       3.4
+      ],
+      "mean": 3.05
+     },
+     "water_absorption_pct": {
+      "range": [
+       72,
+       73
+      ],
+      "mean": 72.5
+     },
+     "u_200mm_wall": {
+      "range": [
+       0.7,
+       0.7
+      ],
+      "note": "200 mm unit + 15 mm plaster both sides (Table 4.1)"
+     },
+     "note": "Measured in Indian labs (ISO 22007-2, ASTM C20, IS 3495/IS 2185); no Kerala sample. Descriptor only: the U-value calculation keeps ENS 2024 Table 46."
+    },
+    "embodied_energy_mj_kg": {
+     "value": 3.7,
+     "source": "S20",
+     "grade": "B",
+     "note": "Cradle-to-gate, 'Aircrete' (Table 14)."
+    },
+    "recycled_content_pct": {
+     "value": 60.4,
+     "source": "S20",
+     "grade": "C",
+     "note": "Fly ash 272 of 450 kg/m3 dry raw materials in the IFC aircrete model (Table 7); a modelled mix, not a product declaration."
+    }
    },
    "BRICK": {
     "compressive_n_mm2": {
-     "min": 3.5,
-     "source": "S19",
-     "grade": "C",
-     "note": "IS 1077 lowest class (secondary summary); local country-fired bricks vary widely."
-    },
-    "water_absorption_pct": {
-     "max": 20,
-     "source": "S19",
-     "grade": "C"
-    },
-    "standard": "IS 1077"
-   },
-   "FAB": {
-    "compressive_n_mm2": {
-     "min": 7.5,
-     "source": "S19",
-     "grade": "C"
+     "range": [
+      4.16,
+      58.21
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=23 Indian samples (mean 17.605 MPa)."
     },
     "water_absorption_pct": {
      "range": [
-      15,
-      20
+      7,
+      32
      ],
-     "source": "S19",
-     "grade": "C",
-     "note": "Limit reported differently by sources."
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=23 Indian samples (mean 17.435 %)."
     },
-    "standard": "IS 12894"
+    "standard": "IS 1077",
+    "measured": {
+     "source": "S21",
+     "grade": "B",
+     "n": 23,
+     "samples": "23 fired clay bricks (hand-moulded, extruded, soft-mud; TN, KA, MH, ...)",
+     "density_kg_m3": {
+      "range": [
+       1264,
+       2119
+      ],
+      "mean": 1735.739
+     },
+     "k_W_mK": {
+      "range": [
+       0.38,
+       1.12
+      ],
+      "mean": 0.59
+     },
+     "cp_J_kgK": {
+      "range": [
+       907.8,
+       978.6
+      ],
+      "mean": 933.2
+     },
+     "compressive_n_mm2": {
+      "range": [
+       4.16,
+       58.21
+      ],
+      "mean": 17.605
+     },
+     "water_absorption_pct": {
+      "range": [
+       7,
+       32
+      ],
+      "mean": 17.435
+     },
+     "u_200mm_wall": {
+      "range": [
+       1.34,
+       2.56
+      ],
+      "note": "200 mm unit + 15 mm plaster both sides (Table 4.1)"
+     },
+     "note": "Measured in Indian labs (ISO 22007-2, ASTM C20, IS 3495/IS 2185); no Kerala sample. Descriptor only: the U-value calculation keeps ENS 2024 Table 46."
+    },
+    "embodied_energy_mj_kg": {
+     "value": 4.4,
+     "source": "S20",
+     "grade": "B",
+     "note": "Cradle-to-gate, 'Brick (common/facing)' (Table 14)."
+    },
+    "embodied_energy_alt": {
+     "value": 4.3,
+     "unit": "MJ per brick",
+     "source": "S01",
+     "grade": "C",
+     "note": "ENS 2024 Annexure 2, Table 59 (CBRI, Mohan Rai): burnt clay brick 4.3 MJ each; clay fly-ash brick 2.3 MJ each."
+    }
+   },
+   "FAB": {
+    "compressive_n_mm2": {
+     "range": [
+      3.6,
+      19.98
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=10 Indian samples (mean 10.633 MPa)."
+    },
+    "water_absorption_pct": {
+     "range": [
+      12,
+      27
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=10 Indian samples (mean 18.4 %)."
+    },
+    "standard": "IS 12894",
+    "measured": {
+     "source": "S21",
+     "grade": "B",
+     "n": 10,
+     "samples": "10 fly ash bricks",
+     "density_kg_m3": {
+      "range": [
+       1299,
+       2048
+      ],
+      "mean": 1728.7
+     },
+     "k_W_mK": {
+      "range": [
+       0.36,
+       0.86
+      ],
+      "mean": 0.578
+     },
+     "cp_J_kgK": {
+      "range": [
+       908.0,
+       976.2
+      ],
+      "mean": 938.62
+     },
+     "compressive_n_mm2": {
+      "range": [
+       3.6,
+       19.98
+      ],
+      "mean": 10.633
+     },
+     "water_absorption_pct": {
+      "range": [
+       12,
+       27
+      ],
+      "mean": 18.4
+     },
+     "u_200mm_wall": {
+      "range": [
+       1.3,
+       2.25
+      ],
+      "note": "200 mm unit + 15 mm plaster both sides (Table 4.1)"
+     },
+     "note": "Measured in Indian labs (ISO 22007-2, ASTM C20, IS 3495/IS 2185); no Kerala sample. Descriptor only: the U-value calculation keeps ENS 2024 Table 46."
+    },
+    "embodied_energy_mj_kg": {
+     "value": 0.83,
+     "source": "S20",
+     "grade": "C",
+     "note": "Cradle-to-gate, 'FaLG block' (Table 14)."
+    },
+    "recycled_content_pct": {
+     "value": 23,
+     "source": "S20",
+     "grade": "C",
+     "note": "PFA 23 % by mass in the IFC FaLG model (plus 45 % quarry dust)."
+    }
    },
    "HCB": {
     "compressive_n_mm2": {
@@ -3159,11 +3621,90 @@
      "source": "S19",
      "grade": "C"
     },
-    "standard": "IS 2185 (Part 1)"
+    "standard": "IS 2185 (Part 1)",
+    "embodied_energy_mj_kg": {
+     "value": 2.7,
+     "source": "S20",
+     "grade": "B",
+     "note": "Cradle-to-gate, 'Medium density concrete block' (Table 14)."
+    }
    },
    "SCB": {
     "standard": "IS 2185 (Part 1)",
-    "note": "No product test data collected."
+    "note": "No product test data collected.",
+    "measured": {
+     "source": "S21",
+     "grade": "B",
+     "n": 2,
+     "samples": "2 concrete blocks (Bengaluru, Vijayawada)",
+     "density_kg_m3": {
+      "range": [
+       1961,
+       2032
+      ],
+      "mean": 1996.5
+     },
+     "k_W_mK": {
+      "range": [
+       0.66,
+       0.81
+      ],
+      "mean": 0.735
+     },
+     "cp_J_kgK": {
+      "range": [
+       912.8,
+       928.9
+      ],
+      "mean": 920.85
+     },
+     "compressive_n_mm2": {
+      "range": [
+       6.8,
+       10.04
+      ],
+      "mean": 8.42
+     },
+     "water_absorption_pct": {
+      "range": [
+       9,
+       13
+      ],
+      "mean": 11.0
+     },
+     "u_200mm_wall": {
+      "range": [
+       1.94,
+       2.17
+      ],
+      "note": "200 mm unit + 15 mm plaster both sides (Table 4.1)"
+     },
+     "note": "Measured in Indian labs (ISO 22007-2, ASTM C20, IS 3495/IS 2185); no Kerala sample. Descriptor only: the U-value calculation keeps ENS 2024 Table 46."
+    },
+    "water_absorption_pct": {
+     "range": [
+      9,
+      13
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=2 Indian samples (mean 11.0 %)."
+    },
+    "compressive_n_mm2": {
+     "range": [
+      6.8,
+      10.04
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=2 Indian samples (mean 8.42 MPa)."
+    },
+    "embodied_energy_mj_kg": {
+     "value": 1.3,
+     "source": "S20",
+     "grade": "B",
+     "note": "Cradle-to-gate, 'Dense concrete block' (Table 14)."
+    }
    },
    "PCB": {
     "density_kg_m3": {
@@ -3188,18 +3729,170 @@
      "source": "S18",
      "grade": "C"
     },
-    "standard": "IS 3952"
+    "standard": "IS 3952",
+    "embodied_energy_mj_kg": {
+     "value": 3.5,
+     "source": "S20",
+     "grade": "C",
+     "note": "Cradle-to-gate, 'Honeycomb brick' (Table 14)."
+    }
    },
    "CSEB": {
     "standard": "IS 1725",
-    "note": "No strength or absorption data collected; Kerala listings do not state test results."
+    "note": "No strength or absorption data collected; Kerala listings do not state test results.",
+    "measured": {
+     "source": "S21",
+     "grade": "B",
+     "n": 2,
+     "samples": "2 CSEB (New Delhi, Bengaluru)",
+     "density_kg_m3": {
+      "range": [
+       1630,
+       1773
+      ],
+      "mean": 1701.5
+     },
+     "k_W_mK": {
+      "range": [
+       0.59,
+       0.75
+      ],
+      "mean": 0.67
+     },
+     "cp_J_kgK": {
+      "range": [
+       908.3,
+       934.8
+      ],
+      "mean": 921.55
+     },
+     "compressive_n_mm2": {
+      "range": [
+       1.76,
+       13.05
+      ],
+      "mean": 7.405
+     },
+     "water_absorption_pct": {
+      "range": [
+       16,
+       22
+      ],
+      "mean": 19.0
+     },
+     "u_200mm_wall": {
+      "range": [
+       1.81,
+       2.08
+      ],
+      "note": "200 mm unit + 15 mm plaster both sides (Table 4.1)"
+     },
+     "note": "Measured in Indian labs (ISO 22007-2, ASTM C20, IS 3495/IS 2185); no Kerala sample. Descriptor only: the U-value calculation keeps ENS 2024 Table 46."
+    },
+    "water_absorption_pct": {
+     "range": [
+      16,
+      22
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=2 Indian samples (mean 19.0 %)."
+    },
+    "compressive_n_mm2": {
+     "range": [
+      1.76,
+      13.05
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=2 Indian samples (mean 7.405 MPa)."
+    },
+    "embodied_energy_mj_kg": {
+     "value": 0.7,
+     "source": "S20",
+     "grade": "B",
+     "note": "Cradle-to-gate, 'OPC stabilized soil block' (Table 14)."
+    }
    },
    "LAT": {
     "standard": "IS 3620",
-    "note": "Kerala laterite strength and absorption vary by quarry; a secondary presentation reports 10-18% absorption (not used)."
+    "note": "Kerala laterite strength and absorption vary by quarry; test per IS 3620. Price 2026: Kannur about Rs 34.50, Kasaragod about Rs 30 per stone (S24), size not stated.",
+    "density_kg_m3": {
+     "value": 1930,
+     "source": "S22",
+     "grade": "C",
+     "note": "Calibrated literature value (Lawane et al. 2014) used for a coastal Karnataka laterite house."
+    }
    },
    "CLC": {
-    "note": "No Kerala product data collected."
+    "note": "No Kerala product data collected.",
+    "measured": {
+     "source": "S21",
+     "grade": "B",
+     "n": 1,
+     "samples": "1 CLC block (Pune)",
+     "density_kg_m3": {
+      "range": [
+       693,
+       693
+      ],
+      "mean": 693.0
+     },
+     "k_W_mK": {
+      "range": [
+       0.19,
+       0.19
+      ],
+      "mean": 0.19
+     },
+     "cp_J_kgK": {
+      "range": [
+       932.2,
+       932.2
+      ],
+      "mean": 932.2
+     },
+     "compressive_n_mm2": {
+      "range": [
+       1.12,
+       1.12
+      ],
+      "mean": 1.12
+     },
+     "water_absorption_pct": {
+      "range": [
+       78,
+       78
+      ],
+      "mean": 78.0
+     },
+     "u_200mm_wall": {
+      "range": [
+       0.8,
+       0.8
+      ],
+      "note": "200 mm unit + 15 mm plaster both sides (Table 4.1)"
+     },
+     "note": "Measured in Indian labs (ISO 22007-2, ASTM C20, IS 3495/IS 2185); no Kerala sample. Descriptor only: the U-value calculation keeps ENS 2024 Table 46."
+    },
+    "water_absorption_pct": {
+     "range": [
+      78,
+      78
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=1 Indian samples (mean 78.0 %)."
+    },
+    "compressive_n_mm2": {
+     "range": [
+      1.12,
+      1.12
+     ],
+     "source": "S21",
+     "grade": "B",
+     "note": "Measured, n=1 Indian samples (mean 1.12 MPa)."
+    }
    }
   },
   "search": {
